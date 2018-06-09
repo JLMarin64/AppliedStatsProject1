@@ -1,22 +1,31 @@
 ---
-title: "Project1"
-date: "June 8, 2018"
+title: "Untitled"
+
+date: "June 9, 2018"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
 
 library(sqldf)
 library(glmnet)
 library(caret)
+library(forcats)
 
-setwd("C:/Users/i64756/Desktop/Applied Stats")
+#setwd("C:/Users/i64756/Desktop/Applied Stats")
+
+setwd("C:/Users/Marin Family/Desktop/SMU Coursework/Applied Stats/Project1")
 
 train <- read.csv("train.csv")
 test <- read.csv("test.csv")
 
 
+#This shows us what is null
 sapply(train, function(x) sum(is.na(x)))
 
 #The following variables have missing information:
@@ -24,31 +33,101 @@ sapply(train, function(x) sum(is.na(x)))
 #LotFrontage, Alley, MasVnrType, MasVnrArea, BsmtQual, BstCond, BsmtExposure, BsmtFinType1, BsmtFinType2,
 #FireplaceQu, GarageType, GarageYrBlt, GarageFinish, GarageCond, Fence, MiscFeature, PoolQC
 
+
+test$SalePrice <- 0  #Adding sale price to the test set for combining
+
+
+#Data Preprocessing
+
+data <- rbind(train, test)
+
+
+#Not using this data because not much data there
+
+data$MiscFeature <- NULL # Missing value in 96.4% of observations
+data$Alley <- NULL # Missing value in 93.2% of observations
+data$PoolQC <- NULL # Missing value in 99.7% of observations
+
+#Variables with NA
+NAFeatures = names(which(colSums(is.na(data))>0))
+
+
+#Get the median lot frontage and update where NA
 median(train$LotFrontage, na.rm = TRUE)  # This ends up being 69.  Going to update the NA 
 
-train$LotFrontage[is.na(train$LotFrontage)] <-69
-test$LotFrontage[is.na(test$LotFrontage)] <- 69
+data$LotFrontage[is.na(data$LotFrontage)] <-69
 
-train$GarageYrBlt[is.na(train$GarageYrBlt)] <-  as.integer(train$YearBuilt)
-test$GarageYrBlt[is.na(test$GarageYrBlt)] <-  as.integer(test$YearBuilt)
+#if NA for GarageYrBlt, then set to YearBuilt of house
+data$GarageYrBlt[is.na(data$GarageYrBlt)] <-  as.integer(data$YearBuilt)
 
 
-xtrain <- train
-ytrain <- as.data.frame(train$SalePrice)
+missingObs = c("MSZoning", "MasVnrType", "Utilities", "Exterior1st", "Exterior2nd", "SaleType")
+effZero = c("LotFrontage", "MasVnrArea", "BsmtFinSF1", "BsmtFinSF2", "BsmtUnfSF", "TotalBsmtSF","GarageCars", "GarageArea", "BsmtFullBath", "BsmtHalfBath")
+
+
+# Get Effectively Absent category by excluding other categories from varsWithNA
+effAbsent = NAFeatures[!NAFeatures %in% missingObs]
+effAbsent = effAbsent[!effAbsent %in% effZero]
+effAbsent = effAbsent[!effAbsent %in% c("Functional")]
+
+
+# Function for replacing NAs in nominal and ordinal variables
+replaceNAfactor = function(data.col, factorString){
+  char.col <- as.character(data.col)
+  char.col[which(is.na(data.col))] <- factorString
+  as.factor(char.col)
+}
+# Replace NAs with None in Effectively Absent category
+for (i in 1:ncol(data)){
+  if(names(data[i]) %in% effAbsent){
+    data[,i] <- replaceNAfactor(data[,i], "None")}
+}
+# Replace NAs with MissingObs in Missing Observations category
+for (i in 1:ncol(data)){
+  if(names(data[i]) %in% missingObs){
+    data[,i] <- replaceNAfactor(data[,i], "MissingObs")}
+}
+# Replace NAs with 0 in Effectively Zero category
+for (i in 1:ncol(data)){
+  if(names(data[i]) %in% effZero)
+    data[is.na(data[,i]),i] <- 0
+}
+
+data$Functional <- replaceNAfactor(data$Functional, "Typ")
+
+
+#Checking that we corrected for NAs
+sapply(data, function(x) sum(is.na(x)))
+
+
+#Resplitting train and test
+
+xtrain <- sqldf("select * from data where SalePrice <> 0")
+ytrain <- sqldf("select SalePrice from data where SalePrice <> 0")
 names(ytrain) <- c("SalePrice")
 
-
 xtrain$SalePrice <- NULL
-  
-xtest <- test
+ 
+xtest <- sqldf("select * from data where SalePrice = 0")
+
+xtest$SalePrice <- NULL
 
 
+#Running a regression model with all the data
+modelfit1 <- lm(ytrain$SalePrice ~ ., data = xtrain)
 
+summary(modelfit1)
+
+#R^2 is .937
+
+
+#Lasso Model
 
 `%ni%` <- Negate(`%in%`)
 
-x = model.matrix(ytrain$SalePrice ~., xtrain)[,-1]
-y = ytrain$SalePrice
+
+x = model.matrix(ytrain$SalePrice~., data = xtrain[,-1]) 
+y = (ytrain$SalePrice)
 
 cv.out <- cv.glmnet(x,y,alpha = 1)
 plot(cv.out)
@@ -63,7 +142,7 @@ variables <- variables[variables %ni% ('Intercept')]
 
 variables
 
+#NeighborhoodNoRidge is not a variable, but a level in the feature. 
 
 
 ```
-
