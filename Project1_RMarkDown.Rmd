@@ -1,0 +1,69 @@
+---
+title: "Project1"
+date: "June 8, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(sqldf)
+library(glmnet)
+library(caret)
+
+setwd("C:/Users/i64756/Desktop/Applied Stats")
+
+train <- read.csv("train.csv")
+test <- read.csv("test.csv")
+
+
+sapply(train, function(x) sum(is.na(x)))
+
+#The following variables have missing information:
+
+#LotFrontage, Alley, MasVnrType, MasVnrArea, BsmtQual, BstCond, BsmtExposure, BsmtFinType1, BsmtFinType2,
+#FireplaceQu, GarageType, GarageYrBlt, GarageFinish, GarageCond, Fence, MiscFeature, PoolQC
+
+median(train$LotFrontage, na.rm = TRUE)  # This ends up being 69.  Going to update the NA 
+
+train$LotFrontage[is.na(train$LotFrontage)] <-69
+test$LotFrontage[is.na(test$LotFrontage)] <- 69
+
+train$GarageYrBlt[is.na(train$GarageYrBlt)] <-  as.integer(train$YearBuilt)
+test$GarageYrBlt[is.na(test$GarageYrBlt)] <-  as.integer(test$YearBuilt)
+
+
+xtrain <- train
+ytrain <- as.data.frame(train$SalePrice)
+names(ytrain) <- c("SalePrice")
+
+
+xtrain$SalePrice <- NULL
+  
+xtest <- test
+
+
+
+
+`%ni%` <- Negate(`%in%`)
+
+x = model.matrix(ytrain$SalePrice ~., xtrain)[,-1]
+y = ytrain$SalePrice
+
+cv.out <- cv.glmnet(x,y,alpha = 1)
+plot(cv.out)
+bestlambda <- cv.out$lambda.1se
+
+c<- coef(cv.out, s = bestlambda, extract = TRUE)
+
+inds <- which(c!=0)
+
+variables <- row.names(c)[inds]
+variables <- variables[variables %ni% ('Intercept')]
+
+variables
+
+
+
+```
+
