@@ -113,12 +113,23 @@ xtest <- sqldf("select * from data where SalePrice = 0")
 xtest$SalePrice <- NULL
 
 
-#Running a regression model with all the data
+#Running an initial regression model with all the data
 modelfit1 <- lm(ytrain$SalePrice ~ ., data = xtrain)
 
 summary(modelfit1)
 
 #R^2 is .937
+
+
+#NEXT STEPS
+
+#Outlier cookd/leverage analysis
+
+#Forward Selection
+
+#Backward Selection
+
+#Stepwise Selection
 
 
 #Lasso Model
@@ -142,7 +153,14 @@ variables <- variables[variables %ni% ('Intercept')]
 
 variables
 
-#NeighborhoodNoRidge is not a variable, but a level in the feature. 
+#Run several models from all the selection processes
+
+#Enter interaction terms (ex:  GarageYrBuilt * GarageCars * GarageArea )
+
+#Compare AIC or R^2 from all models
+
+
+
 
 
 ```
