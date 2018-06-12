@@ -13,6 +13,8 @@ output: html_document
 #Set up working directory
 setwd("E:/Bibliotecas/Documents/Data Science/SMU/MSDS 6372/AppliedStatsProject1")
 
+setwd("C:/Users/Marin Family/Desktop/SMU Coursework/Applied Stats/Project1")
+
 #Load the data
 train <- read.csv("train.csv")
 test <- read.csv("test.csv")
@@ -189,26 +191,47 @@ variables <- variables[variables %ni% ('Intercept')]
 variables
 
 #Forward selection model
-model <- lm(ytrain$SalePrice ~ ., data = xtrain)
-modelforward <- ols_step_forward_p(model)
+model <- lm(ytrain$SalePrice ~ ., data = xtrain[,-1])  #added [,-1] part so that we remove the id from model
+modelforward <- ols_step_forward(model)  #Took out the _p from this and it worked
 modelforward
+summary(modelforward)
+
+steps <- modelforward$steps
+
+modelforward$adjr[steps]
+
+modelforward$rmse[steps]
+
+modelforward$predictors
+
 plot(modelforward)
 
-#Backward Selection model
+#Backward Selection model  #Taking 18 hours to run so far (JM) Corrected code, but taking to long. 
 #Code does not work as desired
-# modelbackward <- ols_step_backward_p(model)
-# modelbackward
-# plot(modelbackward)
+#modelbackward <- ols_step_backward(model)
+#modelbackward
+
+
+#summary(modelbackward)
+
+#steps <- modelbackward$steps
+
+#modelbackward$adjr[steps]
+
+#modelbackward$rmse[steps]
+
+#modelbackward$predictors
+
+#plot(modelbackward)
 
 #Stepwise Selection model
-#Code does not work as desired
-#modelstepwise <- ols_step_both_p(model)
+#modelstepwise <- ols_step_both(model)
 #modelstepwise
 #plot(modelstepwise)
 ```
 
 ##Pending tasks
-
+* Run Outlier (Cook's D and Leverage) Analysis
 * Run several models from all the selection processes. Check why the olsrr package does not produce the models
 * Enter interaction terms (ex:  GarageYrBuilt * GarageCars * GarageArea )
 * Create table comparing comparing AIC or R^2 from all models, and make decision
