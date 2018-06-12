@@ -1,75 +1,79 @@
 ---
 title: "Untitled"
-
-date: "June 9, 2018"
+author: "Rene Pineda"
+date: "June 11, 2018"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+#MSDS 6371 Project 1
 
+## Setup and Loading packagges
+```{r setup, echo=FALSE}
 
-```{r}
+#Set up working directory
+setwd("E:/Bibliotecas/Documents/Data Science/SMU/MSDS 6372/AppliedStatsProject1")
 
-library(sqldf)
-library(glmnet)
-library(caret)
-library(forcats)
-
-#setwd("C:/Users/i64756/Desktop/Applied Stats")
-
-setwd("C:/Users/Marin Family/Desktop/SMU Coursework/Applied Stats/Project1")
-
+#Load the data
 train <- read.csv("train.csv")
 test <- read.csv("test.csv")
 
+#Inspect the data
+dim(train)
+str(train)
+
+library(sqldf) # Used for manipulating the data frames using SQL
+library(glmnet) # Used for...
+library(caret) # Used for...
+library(forcats) # Used for...
+library(olsrr) # Used for creating the foward, backward, and stepwise models
+library(tidyr) #Used for creating some of the plots
+library(ggplot2) #Used for creating some of the plots
+library(corrplot) #Used to create the correlation matrix
+```
+
+
+
+## Data cleaning and preparation
+
+```{r data preparation, echo=FALSE}
 
 #This shows us what is null
 sapply(train, function(x) sum(is.na(x)))
 
-#The following variables have missing information:
-
+#upon inspecton, the following variables have missing information:
 #LotFrontage, Alley, MasVnrType, MasVnrArea, BsmtQual, BstCond, BsmtExposure, BsmtFinType1, BsmtFinType2,
 #FireplaceQu, GarageType, GarageYrBlt, GarageFinish, GarageCond, Fence, MiscFeature, PoolQC
 
+#Adding sale price to the test set for combining
+test$SalePrice <- 0  
 
-test$SalePrice <- 0  #Adding sale price to the test set for combining
-
-
-#Data Preprocessing
-
+#Join the train and test sets for preprocessing
 data <- rbind(train, test)
 
-
-#Not using this data because not much data there
-
+#Converting values to NULL in the following variables tha will not be used
 data$MiscFeature <- NULL # Missing value in 96.4% of observations
 data$Alley <- NULL # Missing value in 93.2% of observations
 data$PoolQC <- NULL # Missing value in 99.7% of observations
 
-#Variables with NA
+#Variables with values as NA
 NAFeatures = names(which(colSums(is.na(data))>0))
-
 
 #Get the median lot frontage and update where NA
 median(train$LotFrontage, na.rm = TRUE)  # This ends up being 69.  Going to update the NA 
 
 data$LotFrontage[is.na(data$LotFrontage)] <-69
 
-#if NA for GarageYrBlt, then set to YearBuilt of house
+#If NA for GarageYrBlt, then set to YearBuilt of house
 data$GarageYrBlt[is.na(data$GarageYrBlt)] <-  as.integer(data$YearBuilt)
 
-
+#Create vectors of Variables with missing observations and variables with zero values
 missingObs = c("MSZoning", "MasVnrType", "Utilities", "Exterior1st", "Exterior2nd", "SaleType")
 effZero = c("LotFrontage", "MasVnrArea", "BsmtFinSF1", "BsmtFinSF2", "BsmtUnfSF", "TotalBsmtSF","GarageCars", "GarageArea", "BsmtFullBath", "BsmtHalfBath")
-
 
 # Get Effectively Absent category by excluding other categories from varsWithNA
 effAbsent = NAFeatures[!NAFeatures %in% missingObs]
 effAbsent = effAbsent[!effAbsent %in% effZero]
 effAbsent = effAbsent[!effAbsent %in% c("Functional")]
-
 
 # Function for replacing NAs in nominal and ordinal variables
 replaceNAfactor = function(data.col, factorString){
@@ -77,16 +81,19 @@ replaceNAfactor = function(data.col, factorString){
   char.col[which(is.na(data.col))] <- factorString
   as.factor(char.col)
 }
+
 # Replace NAs with None in Effectively Absent category
 for (i in 1:ncol(data)){
   if(names(data[i]) %in% effAbsent){
     data[,i] <- replaceNAfactor(data[,i], "None")}
 }
+
 # Replace NAs with MissingObs in Missing Observations category
 for (i in 1:ncol(data)){
   if(names(data[i]) %in% missingObs){
     data[,i] <- replaceNAfactor(data[,i], "MissingObs")}
 }
+
 # Replace NAs with 0 in Effectively Zero category
 for (i in 1:ncol(data)){
   if(names(data[i]) %in% effZero)
@@ -95,47 +102,78 @@ for (i in 1:ncol(data)){
 
 data$Functional <- replaceNAfactor(data$Functional, "Typ")
 
-
 #Checking that we corrected for NAs
 sapply(data, function(x) sum(is.na(x)))
 
-
 #Resplitting train and test
-
 xtrain <- sqldf("select * from data where SalePrice <> 0")
 ytrain <- sqldf("select SalePrice from data where SalePrice <> 0")
 names(ytrain) <- c("SalePrice")
 
 xtrain$SalePrice <- NULL
- 
+
 xtest <- sqldf("select * from data where SalePrice = 0")
 
 xtest$SalePrice <- NULL
+```
+
+## Some exploratory Analysis
 
 
+```{r Corr Matrix and Scatterplots, echo=FALSE}
+#Correlation matrix
+#The following variables will be included in the matrix: Lot Frontage, Lot Area, Year Built, Year Remod/Add, 
+#Mas Vnr Area, Bsmt Fin SF 1, BsmtFin SF 2, Bsmt Unf SF, Total Bsmt SF, 1st Flr SF, 2nd Flr SF, Low Qual Fin SF,
+#Gr Liv Area, Garage Area, Wood Deck Sf, Open Porch SF, Enclosed Porch, 3-Ssn Porch, Screen Porch, Pool Area, 
+#Misc Val, Yr Sold, Sale Price
+
+#Choose only these variables:
+numericvars <- xtrain[,c(4,5,19,20,26,34,36,37,38,43,44,45,46,62,66,67,68,69,70,71,73,75)]
+nonnumericvars <- xtrain[,-c(4,5,19,20,26,34,36,37,38,43,44,45,46,62,66,67,68,69,70,71,73,75)]
+corrvar <- cbind(numericvars,ytrain)
+
+#Create the correlation matrix
+
+N <- cor(corrvar, use = "complete.obs")
+corrplot(N, method = "number", number.cex = 0.5, tl.cex = 0.7)           
+
+#Create the scatterplots
+
+#Function to create the scatterplots
+scatterplots <- cbind(xtrain, ytrain)
+
+makeScatterplots <- function(dataframe,x.variable){
+  print(ggplot(data = dataframe) + 
+    geom_point(mapping = aes(x = scatterplots[,x.variable], y = SalePrice), color = "dodgerblue3" ) +
+    scale_y_continuous(labels = scales::dollar) +
+    labs(x = (names(scatterplots[x.variable]))))
+  }
+
+#Create the scatterplots you're interested in by changing the variable numbers in the FOR statement
+for (variable in c(2,75,25,6,8,14,29)){
+  makeScatterplots(scatterplots,variable)
+}
+```
+
+##Regression Models
+
+So far we've created four regression models
+* Initial model with all variables: modelfit1
+* LASSO model
+* Forward selection model using p-values as criteria: modelfoward
+* Backward selection model using p-values as criteria: modelbackward
+* Stepwise selection model using p-values as criteria: modelstepwise
+
+```{r Regression models, echo=FALSE}
 #Running an initial regression model with all the data
-modelfit1 <- lm(ytrain$SalePrice ~ ., data = xtrain)
-
+modelfit1 <- lm(ytrain$SalePrice ~ ., data = xtrain[,-1])
 summary(modelfit1)
-
 #R^2 is .937
-
-
-#NEXT STEPS
-
-#Outlier cookd/leverage analysis
-
-#Forward Selection
-
-#Backward Selection
-
-#Stepwise Selection
-
+summary(modelfit1)$adj.r.squared
 
 #Lasso Model
 
 `%ni%` <- Negate(`%in%`)
-
 
 x = model.matrix(ytrain$SalePrice~., data = xtrain[,-1]) 
 y = (ytrain$SalePrice)
@@ -145,22 +183,33 @@ plot(cv.out)
 bestlambda <- cv.out$lambda.1se
 
 c<- coef(cv.out, s = bestlambda, extract = TRUE)
-
 inds <- which(c!=0)
-
 variables <- row.names(c)[inds]
 variables <- variables[variables %ni% ('Intercept')]
-
 variables
 
-#Run several models from all the selection processes
+#Forward selection model
+model <- lm(ytrain$SalePrice ~ ., data = xtrain)
+modelforward <- ols_step_forward_p(model)
+modelforward
+plot(modelforward)
 
-#Enter interaction terms (ex:  GarageYrBuilt * GarageCars * GarageArea )
+#Backward Selection model
+#Code does not work as desired
+# modelbackward <- ols_step_backward_p(model)
+# modelbackward
+# plot(modelbackward)
 
-#Compare AIC or R^2 from all models
-
-
-
-
-
+#Stepwise Selection model
+#Code does not work as desired
+#modelstepwise <- ols_step_both_p(model)
+#modelstepwise
+#plot(modelstepwise)
 ```
+
+##Pending tasks
+
+* Run several models from all the selection processes. Check why the olsrr package does not produce the models
+* Enter interaction terms (ex:  GarageYrBuilt * GarageCars * GarageArea )
+* Create table comparing comparing AIC or R^2 from all models, and make decision
+* Perform the 2-way ANOVA analysis for the second part of the project assignment
