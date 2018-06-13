@@ -18,6 +18,8 @@ setwd("E:/Bibliotecas/Documents/Data Science/SMU/MSDS 6372/AppliedStatsProject1"
 #Jonathan's WD
 setwd("C:/Users/Marin Family/Desktop/SMU Coursework/Applied Stats/Project1")
 
+
+
 #Load the data
 train <- read.csv("train.csv")
 test <- read.csv("test.csv")
@@ -211,6 +213,8 @@ ytrain <- as.data.frame(ytrain[-influential,])
 
 #Lasso Model
 
+
+```{r}
 `%ni%` <- Negate(`%in%`)
 
 x = model.matrix(ytrain$SalePrice~., data = xtrain[,-1]) 
@@ -264,11 +268,12 @@ plot(modelforward)
 #modelstepwise <- ols_step_both(model)
 #modelstepwise
 #plot(modelstepwise)
+
 ```
 
 ##Pending tasks
-* Run Outlier (Cook's D and Leverage) Analysis
-* Run several models from all the selection processes. Check why the olsrr package does not produce the models
-* Enter interaction terms (ex:  GarageYrBuilt * GarageCars * GarageArea )
-* Create table comparing comparing AIC or R^2 from all models, and make decision
-* Perform the 2-way ANOVA analysis for the second part of the project assignment
+* Run several models from all the selection processes. - Rene 
+* Create table comparing comparing AIC or R^2 from all models, and make decision - Rene
+* Enter interaction terms (ex:  GarageYrBuilt * GarageCars * GarageArea ) -- Samira?
+* Clean up and prep final doc within the rmarkdown? - Samira? 
+* Perform the 2-way ANOVA analysis for the second part of the project assignment  --Rajat
