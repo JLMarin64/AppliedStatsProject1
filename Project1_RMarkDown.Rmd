@@ -18,6 +18,7 @@ setwd("E:/Bibliotecas/Documents/Data Science/SMU/MSDS 6372/AppliedStatsProject1"
 #Jonathan's WD
 setwd("C:/Users/Marin Family/Desktop/SMU Coursework/Applied Stats/Project1")
 
+ 
 
 
 #Load the data
@@ -36,6 +37,8 @@ library(olsrr) # Used for creating the foward, backward, and stepwise models
 library(tidyr) #Used for creating some of the plots
 library(ggplot2) #Used for creating some of the plots
 library(corrplot) #Used to create the correlation matrix
+library(parallel) #Using to assign more cores and allow parallel processing
+library(doParallel)#Using to assign more cores and allow parallel processing
 ```
 
 
@@ -43,6 +46,16 @@ library(corrplot) #Used to create the correlation matrix
 ## Data cleaning and preparation
 
 ```{r data preparation, echo=FALSE}
+
+
+#Going to assign more cores to R and leave one for OS. Not sure if it will help feature selection
+#but worth a shot.
+
+cluster <- makeCluster(detectCores()-1)
+registerDoParallel(cluster)
+
+fitControl <- trainControl(method = "cv", number = 3, allowParallel = TRUE)
+
 
 #This shows us what is null
 sapply(train, function(x) sum(is.na(x)))
@@ -232,6 +245,8 @@ variables <- row.names(c)[inds]
 variables <- variables[variables %ni% ('Intercept')]
 variables
 
+library(MASS)
+
 #Forward selection model
 model <- lm(ytrain$SalePrice ~ ., data = xtrain[,-1])  #added [,-1] part so that we remove the id from model
 modelforward <- ols_step_forward(model)  #Took out the _p from this and it worked
@@ -253,6 +268,15 @@ plot(modelforward)
 #modelbackward <- ols_step_backward(model)
 #modelbackward
 
+#jm - I usually use the MASS package for feature selection and this worked. 
+backward.mass <- stepAIC(model, direction = "backward", trace = FALSE, steps = 100)
+
+summary(backward.mass)
+
+
+stepwise.mass <- stepAIC(model, direction = "both", trace = FALSE, steps = 500)
+
+summary(stepwise.mass)
 
 #summary(modelbackward)
 
