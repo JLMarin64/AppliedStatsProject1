@@ -113,7 +113,7 @@ data$Functional <- replaceNAfactor(data$Functional, "Typ")
 sapply(data, function(x) sum(is.na(x)))
 
 #Resplitting train and test
-xtrain <- sqldf("select * from data where SalePrice <> 0")
+xtrain <- as.data.frame(sqldf("select * from data where SalePrice <> 0"))
 ytrain <- sqldf("select SalePrice from data where SalePrice <> 0")
 names(ytrain) <- c("SalePrice")
 
@@ -206,6 +206,8 @@ influential <- influential[!is.na(influential)]
 xtrain <- as.data.frame(xtrain[-influential,])
 
 ytrain <- as.data.frame(ytrain[-influential,])
+
+names(ytrain) <- c("SalePrice")
 
 
 ```
