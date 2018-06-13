@@ -11,8 +11,11 @@ output: html_document
 ```{r setup, echo=FALSE}
 
 #Set up working directory
+
+#Rene's WD
 setwd("E:/Bibliotecas/Documents/Data Science/SMU/MSDS 6372/AppliedStatsProject1")
 
+#Jonathan's WD
 setwd("C:/Users/Marin Family/Desktop/SMU Coursework/Applied Stats/Project1")
 
 #Load the data
@@ -157,6 +160,9 @@ for (variable in c(2,75,25,6,8,14,29)){
 }
 ```
 
+
+
+
 ##Regression Models
 
 So far we've created four regression models
@@ -172,6 +178,36 @@ modelfit1 <- lm(ytrain$SalePrice ~ ., data = xtrain[,-1])
 summary(modelfit1)
 #R^2 is .937
 summary(modelfit1)$adj.r.squared
+
+```
+
+
+##Outlier Analysis
+
+```{r}
+#Remove High Leverage Points and Cooks D and create new train set from  this
+
+cooksd <- cooks.distance(modelfit1)
+
+
+sample_size <- nrow(xtrain)
+plot(cooksd, pch="*", cex=2, main="Influential Obs by Cooks distance")  # plot cook's distance
+abline(h = 4/sample_size, col="red")  # add cutoff line
+text(x=1:length(cooksd)+1, y=cooksd, labels=ifelse(cooksd>5/sample_size, names(cooksd),""), col="red")  # add labels
+
+
+#Removing outliers with high cooks d
+influential <- (as.numeric(names(cooksd)[(cooksd > (4/sample_size))]))
+
+influential <- influential[!is.na(influential)]
+
+xtrain <- as.data.frame(xtrain[-influential,])
+
+ytrain <- as.data.frame(ytrain[-influential,])
+
+
+```
+
 
 #Lasso Model
 
