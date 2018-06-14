@@ -208,7 +208,7 @@ cooksd <- cooks.distance(modelfit1)
 sample_size <- nrow(xtrain)
 plot(cooksd, pch="*", cex=2, main="Influential Obs by Cooks distance")  # plot cook's distance
 abline(h = 4/sample_size, col="red")  # add cutoff line
-text(x=1:length(cooksd)+1, y=cooksd, labels=ifelse(cooksd>5/sample_size, names(cooksd),""), col="red")  # add labels
+text(x=1:length(cooksd)+1, y=cooksd, labels=ifelse(cooksd>4/sample_size, names(cooksd),""), col="red")  # add labels
 
 
 #Removing outliers with high cooks d
