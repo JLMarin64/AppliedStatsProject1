@@ -1,6 +1,6 @@
 ---
 title: "Untitled"
-author: "Rene Pineda"
+author: "Rene Pineda, "
 date: "June 11, 2018"
 output: html_document
 ---
@@ -8,6 +8,13 @@ output: html_document
 #MSDS 6371 Project 1
 
 ## Setup and Loading packagges
+
+```{r setup, echo=FALSE}
+list.of.packages <- c("sqldf", "glmnet", "gfortran", "rgl", "CVST", "igraph", "recipes", "ggplot2", "caret", "forcats", "olsrr", "tidyr", "corrplot", "parallel", "doParallel")
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.packages, repos="http://cran.r-project.org")
+```
+
 ```{r setup, echo=FALSE}
 
 #Set up working directory
@@ -18,7 +25,7 @@ setwd("E:/Bibliotecas/Documents/Data Science/SMU/MSDS 6372/AppliedStatsProject1"
 #Jonathan's WD
 setwd("C:/Users/Marin Family/Desktop/SMU Coursework/Applied Stats/Project1")
 
- 
+
 
 
 #Load the data
