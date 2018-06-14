@@ -1,8 +1,10 @@
 ---
 title: "Untitled"
-author: "Rene Pineda, "
+author: 'Rene Pineda, '
 date: "June 11, 2018"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 #MSDS 6371 Project 1
@@ -16,17 +18,6 @@ if(length(new.packages)) install.packages(new.packages, repos="http://cran.r-pro
 ```
 
 ```{r setup, echo=FALSE}
-
-#Set up working directory
-
-#Rene's WD
-setwd("E:/Bibliotecas/Documents/Data Science/SMU/MSDS 6372/AppliedStatsProject1")
-
-#Jonathan's WD
-setwd("C:/Users/Marin Family/Desktop/SMU Coursework/Applied Stats/Project1")
-
-
-
 
 #Load the data
 train <- read.csv("train.csv")
