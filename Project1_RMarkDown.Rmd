@@ -194,6 +194,18 @@ summary(modelfit1)
 #R^2 is .937
 summary(modelfit1)$adj.r.squared
 
+
+
+# Testing model interactions from problem 2 analysis
+modelfit2 <- lm(ytrain$SalePrice ~ MSSubClass + MSZoning + LotFrontage + LotArea + Street +  LotShape + LandContour + Utilities + LotConfig + LandSlope + Neighborhood + Condition1 + Condition2 + BldgType + HouseStyle + OverallQual + OverallCond + YearBuilt + YearRemodAdd + RoofStyle + RoofMatl + Exterior1st + Exterior2nd + MasVnrType + MasVnrArea + ExterQual + ExterCond + Foundation + BsmtQual + BsmtCond + BsmtExposure + BsmtFinType1 + BsmtFinSF1 + BsmtFinType2 + BsmtFinSF2 + BsmtUnfSF + TotalBsmtSF + Heating + HeatingQC + CentralAir + Electrical + xtrain$X1stFlrSF + xtrain$X2ndFlrSF + LowQualFinSF + GrLivArea + BsmtFullBath + BsmtHalfBath + FullBath + HalfBath + BedroomAbvGr + KitchenAbvGr + KitchenQual + TotRmsAbvGrd + Functional + Fireplaces + FireplaceQu + GarageType + GarageYrBlt + GarageFinish + GarageCars + GarageArea + GarageQual + GarageCond + PavedDrive + WoodDeckSF + OpenPorchSF + EnclosedPorch + xtrain$X3SsnPorch + ScreenPorch + PoolArea +  Fence +  MiscVal + MoSold + YrSold + SaleType + SaleCondition + KitchenQual * Neighborhood, data = xtrain[,-1])
+
+summary(modelfit2)
+
+modelfit3 <- lm(ytrain$SalePrice ~ MSSubClass + MSZoning + LotFrontage + LotArea + Street +  LotShape + LandContour + Utilities + LotConfig + LandSlope + Neighborhood + Condition1 + Condition2 + BldgType + HouseStyle + OverallQual + OverallCond + YearBuilt + YearRemodAdd + RoofStyle + RoofMatl + Exterior1st + Exterior2nd + MasVnrType + MasVnrArea + ExterQual + ExterCond + Foundation + BsmtQual + BsmtCond + BsmtExposure + BsmtFinType1 + BsmtFinSF1 + BsmtFinType2 + BsmtFinSF2 + BsmtUnfSF + TotalBsmtSF + Heating + HeatingQC + CentralAir + Electrical + xtrain$X1stFlrSF + xtrain$X2ndFlrSF + LowQualFinSF + GrLivArea + BsmtFullBath + BsmtHalfBath + FullBath + HalfBath + BedroomAbvGr + KitchenAbvGr + KitchenQual + TotRmsAbvGrd + Functional + Fireplaces + FireplaceQu + GarageType + GarageYrBlt + GarageFinish + GarageCars + GarageArea + GarageQual + GarageCond + PavedDrive + WoodDeckSF + OpenPorchSF + EnclosedPorch + xtrain$X3SsnPorch + ScreenPorch + PoolArea +  Fence +  MiscVal + MoSold + YrSold + SaleType + SaleCondition + KitchenQual * Neighborhood + SaleCondition * Neighborhood , data = xtrain[,-1])
+
+summary(modelfit3)
+
+
 ```
 
 
