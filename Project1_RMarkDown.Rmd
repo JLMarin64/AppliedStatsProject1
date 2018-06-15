@@ -11,7 +11,7 @@ output:
 
 ## Setup and Loading packagges
 
-```{r setup, echo=FALSE}
+```{r setup, echo=FALSE, warning=FALSE, message=FALSE}
 list.of.packages <- c("sqldf", "glmnet", "gfortran", "rgl", "CVST", "igraph", "recipes", "ggplot2", "caret", "forcats", "olsrr", "tidyr", "corrplot", "parallel", "doParallel")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages, repos="http://cran.r-project.org")
@@ -23,6 +23,12 @@ if(length(new.packages)) install.packages(new.packages, repos="http://cran.r-pro
 train <- read.csv("train.csv")
 test <- read.csv("test.csv")
 
+# Generate histogram of Sale Price
+h1 <- hist(train$SalePrice, data = train, main = "Historgram of Sale Price", xlab = "Sale Price in US$")
+
+# Perform natural logarithm on response variable.
+train$SalePrice <- log(train$SalePrice)
+
 #Inspect the data
 dim(train)
 str(train)
@@ -31,7 +37,8 @@ library(sqldf) # Used for manipulating the data frames using SQL
 library(glmnet) # Used for...
 library(caret) # Used for...
 library(forcats) # Used for...
-library(olsrr) # Used for creating the foward, backward, and stepwise models
+library(olsrr) # Used for creating the foward
+library(MASS) # Used for backward, and stepwise models
 library(tidyr) #Used for creating some of the plots
 library(ggplot2) #Used for creating some of the plots
 library(corrplot) #Used to create the correlation matrix
@@ -44,7 +51,6 @@ library(doParallel)#Using to assign more cores and allow parallel processing
 ## Data cleaning and preparation
 
 ```{r data preparation, echo=FALSE}
-
 
 #Going to assign more cores to R and leave one for OS. Not sure if it will help feature selection
 #but worth a shot.
@@ -139,6 +145,15 @@ xtest$SalePrice <- NULL
 
 
 ```{r Corr Matrix and Scatterplots, echo=FALSE}
+#Create some histograms
+
+par(mfrow=c(2,2))
+plot(h1)
+hist(train$GrLivArea, main = "Histogram of GrLivArea", xlab = "Area in Square Feet")
+hist(train$YearBuilt, main = "Histogram of Year Built", xlab = "Year in which the House was built")
+hist(train$BedroomAbvGr, main = "Histogram of Bedrroms", xlab = "Number of Bedrooms")
+dev.off()
+
 #Correlation matrix
 #The following variables will be included in the matrix: Lot Frontage, Lot Area, Year Built, Year Remod/Add, 
 #Mas Vnr Area, Bsmt Fin SF 1, BsmtFin SF 2, Bsmt Unf SF, Total Bsmt SF, 1st Flr SF, 2nd Flr SF, Low Qual Fin SF,
@@ -153,28 +168,52 @@ corrvar <- cbind(numericvars,ytrain)
 #Create the correlation matrix
 
 N <- cor(corrvar, use = "complete.obs")
-corrplot(N, method = "number", number.cex = 0.5, tl.cex = 0.7)           
+corrplot(N, method = "number", number.cex = 0.5, tl.cex = 0.7)          
 
 #Create the scatterplots
+#Numeric variables:
+p1 <- ggplot(data = corrvar) + 
+  geom_point(mapping = aes(x = corrvar[,3], y = SalePrice), color = "dodgerblue3" ) +
+  labs(x = (names(corrvar[3])))
+p2 <- ggplot(data = corrvar) + 
+  geom_point(mapping = aes(x = corrvar[,4], y = SalePrice), color = "dodgerblue3" ) +
+  labs(x = (names(corrvar[4])))
+p3 <- ggplot(data = corrvar) + 
+  geom_point(mapping = aes(x = corrvar[,9], y = SalePrice), color = "dodgerblue3" ) +
+  labs(x = (names(corrvar[9])))
+p4 <- ggplot(data = corrvar) + 
+  geom_point(mapping = aes(x = corrvar[,10], y = SalePrice), color = "dodgerblue3" ) +
+  labs(x = (names(corrvar[10])))
+p5 <- ggplot(data = corrvar) + 
+  geom_point(mapping = aes(x = corrvar[,13], y = SalePrice), color = "dodgerblue3" ) +
+  labs(x = (names(corrvar[13])))
+p6 <- ggplot(data = corrvar) + 
+  geom_point(mapping = aes(x = corrvar[,14], y = SalePrice), color = "dodgerblue3" ) +
+  labs(x = (names(corrvar[14])))
+gridExtra::grid.arrange(p1, p2,p3, p4,p5, p6, nrow = 2)
 
-#Function to create the scatterplots
-scatterplots <- cbind(xtrain, ytrain)
-
-makeScatterplots <- function(dataframe,x.variable){
-  print(ggplot(data = dataframe) + 
-    geom_point(mapping = aes(x = scatterplots[,x.variable], y = SalePrice), color = "dodgerblue3" ) +
-    scale_y_continuous(labels = scales::dollar) +
-    labs(x = (names(scatterplots[x.variable]))))
-  }
-
-#Create the scatterplots you're interested in by changing the variable numbers in the FOR statement
-for (variable in c(2,75,25,6,8,14,29)){
-  makeScatterplots(scatterplots,variable)
-}
+#Nonnumeric variables
+nonnumericvars$SalePrice <- corrvar$SalePrice
+p7 <- ggplot(data = nonnumericvars) + 
+  geom_point(mapping = aes(x = nonnumericvars[,10], y = SalePrice), color = "dodgerblue3" ) +
+  labs(x = (names(nonnumericvars[10])))
+p8 <- ggplot(data = nonnumericvars) + 
+  geom_point(mapping = aes(x = nonnumericvars[,13], y = SalePrice), color = "dodgerblue3" ) +
+  labs(x = (names(nonnumericvars[13])))
+p9 <- ggplot(data = nonnumericvars) + 
+  geom_point(mapping = aes(x = nonnumericvars[,14], y = SalePrice), color = "dodgerblue3" ) +
+  labs(x = (names(nonnumericvars[14])))
+p10 <- ggplot(data = nonnumericvars) + 
+  geom_point(mapping = aes(x = nonnumericvars[,15], y = SalePrice), color = "dodgerblue3" ) +
+  labs(x = (names(nonnumericvars[15])))
+p11 <- ggplot(data = nonnumericvars) + 
+  geom_point(mapping = aes(x = nonnumericvars[,22], y = SalePrice), color = "dodgerblue3" ) +
+  labs(x = (names(nonnumericvars[22])))
+p12 <- ggplot(data = nonnumericvars) + 
+  geom_point(mapping = aes(x = nonnumericvars[,40], y = SalePrice), color = "dodgerblue3" ) +
+  labs(x = (names(nonnumericvars[40])))
+gridExtra::grid.arrange(p7, p8,p9, p10,p11, p12, nrow = 2)
 ```
-
-
-
 
 ##Regression Models
 
@@ -202,8 +241,6 @@ summary(modelfit2)
 modelfit3 <- lm(ytrain$SalePrice ~ MSSubClass + MSZoning + LotFrontage + LotArea + Street +  LotShape + LandContour + Utilities + LotConfig + LandSlope + Neighborhood + Condition1 + Condition2 + BldgType + HouseStyle + OverallQual + OverallCond + YearBuilt + YearRemodAdd + RoofStyle + RoofMatl + Exterior1st + Exterior2nd + MasVnrType + MasVnrArea + ExterQual + ExterCond + Foundation + BsmtQual + BsmtCond + BsmtExposure + BsmtFinType1 + BsmtFinSF1 + BsmtFinType2 + BsmtFinSF2 + BsmtUnfSF + TotalBsmtSF + Heating + HeatingQC + CentralAir + Electrical + xtrain$X1stFlrSF + xtrain$X2ndFlrSF + LowQualFinSF + GrLivArea + BsmtFullBath + BsmtHalfBath + FullBath + HalfBath + BedroomAbvGr + KitchenAbvGr + KitchenQual + TotRmsAbvGrd + Functional + Fireplaces + FireplaceQu + GarageType + GarageYrBlt + GarageFinish + GarageCars + GarageArea + GarageQual + GarageCond + PavedDrive + WoodDeckSF + OpenPorchSF + EnclosedPorch + xtrain$X3SsnPorch + ScreenPorch + PoolArea +  Fence +  MiscVal + MoSold + YrSold + SaleType + SaleCondition + KitchenQual * Neighborhood + SaleCondition * Neighborhood , data = xtrain[,-1])
 
 summary(modelfit3)
-
-
 ```
 
 
@@ -287,24 +324,6 @@ summary(backward.mass)
 stepwise.mass <- stepAIC(model, direction = "both", trace = FALSE, steps = 500)
 
 summary(stepwise.mass)
-
-#summary(modelbackward)
-
-#steps <- modelbackward$steps
-
-#modelbackward$adjr[steps]
-
-#modelbackward$rmse[steps]
-
-#modelbackward$predictors
-
-#plot(modelbackward)
-
-#Stepwise Selection model
-#modelstepwise <- ols_step_both(model)
-#modelstepwise
-#plot(modelstepwise)
-
 ```
 
 ##Pending tasks
