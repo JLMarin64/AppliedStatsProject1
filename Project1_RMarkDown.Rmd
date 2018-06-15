@@ -190,7 +190,9 @@ modelfit_with_interactions    <- lm(ytrain$SalePrice ~ MSSubClass + MSZoning + L
                   # Iteraction terms
                   KitchenQual * Neighborhood +
                   SaleCondition * Neighborhood +
-                  OverallCond*OverallQual + GarageYrBlt * GarageCars * GarageArea, data = xtrain[,-1])
+                  OverallCond * OverallQual +
+                  GarageYrBlt * GarageCars * GarageArea,
+data = xtrain[,-1])
 
 # Adjusted R-squared:  0.9313
 print("modelfit_with_interactions: ")
@@ -337,6 +339,11 @@ So far we've created four regression models
 ##Pending tasks
 * Run several models from all the selection processes. - Rene 
 * Create table comparing comparing AIC or R^2 from all models, and make decision - Rene
-* Enter interaction terms (ex:  GarageYrBuilt * GarageCars * GarageArea ) -- Samira?
+* Enter interaction terms (ex:  GarageYrBuilt * GarageCars * GarageArea ) -- Samira (DONE!)
+** I added the following interaction terms, which improved adjusted $R^2$ from 0.9179 to 0.9313
+*** KitchenQual * Neighborhood
+*** SaleCondition * Neighborhood
+*** OverallCond * OverallQual
+*** GarageYrBlt * GarageCars * GarageArea
 * Clean up and prep final doc within the rmarkdown? - Samira? 
 * Perform the 2-way ANOVA analysis for the second part of the project assignment  --Rajat
