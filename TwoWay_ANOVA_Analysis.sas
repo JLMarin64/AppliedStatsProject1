@@ -64,6 +64,8 @@ set kaggdata;
 LogSalePrice = Log(SalePrice); /* In */
 run;
 
+/* To check, for outliers based upon high GrLiving Area as they might not
+be representative of all other houses in the area*/
 proc sgscatter data=Work.Kaggdata;
 plot SalePrice*GrLivArea;
 run;
@@ -111,19 +113,24 @@ proc sgplot data=plottingdataafterlogT;
    label mean='Average Log Sales Price';
 run;   
 
+/* Running the Model, Using proc GLM for obtaining Type 3 SS table and R sq(effect size)
+and then using Proc Mixed to obtain formatted Multiple Comparisons table, if necessary*/
+proc glm data=KaggData;
+class KitchenQual Neighborhood;
+model LogSalePrice = KitchenQual Neighborhood KitchenQual*Neighborhood;
+run; 
+
 /* Storing Comparison Table to a dataset so that only statistically
 significant differences can be extracted */
 ods output diffs=ComparisonData;
 proc mixed data=KaggData plots=RESIDUALPANEL;
 class KitchenQual Neighborhood;
 model LogSalePrice = KitchenQual Neighborhood KitchenQual*Neighborhood;
-lsmeans KitchenQual*Neighborhood/pdiff diff adjust=tukey;
+lsmeans KitchenQual*Neighborhood/pdiff diff cl adjust=tukey;
 run; 
 ods output on;
 ods exclude none;
 
-proc print data=ComparisonData;
-run;
 
 /* Find Same site Diff in Kitchen Qual on Sale Price */
 /* This further bolsters that interaction is important as we see for some sites that
@@ -133,12 +140,40 @@ set ComparisonData;
 if Neighborhood = _Neighborhood;
 run;
 
+/* To convert log back to normal scale. Interpretation would be Media Y/Median X = e ^ estimate*/
+data CompareSameSite_KitchenQual;
+set CompareSameSite_KitchenQual;
+Estimate_NormalScale = exp(Estimate);
+UpperCI_NormalScale = exp(AdjUpper);
+LowerCI_NormalScale = exp(AdjLower);
+run;
+
+proc sort data=CompareSameSite_KitchenQual;
+by AdjP;
+run;
+
+proc print data=CompareSameSite_KitchenQual;
+var KitchenQual Neighborhood _KitchenQual _Neighborhood Adjp Estimate_NormalScale UpperCI_NormalScale LowerCI_NormalScale;
+run;
+
 /* To find all ab kind off means that are statistically significant */
 /* 863 off 2485 pairs are statistically significant, interaction is important one and complex in nature as
 nearly 25% of pairs differ */
 data StatisticallySigDiffs;
 set ComparisonData;
+Estimate_NormalScale = exp(Estimate);
+UpperCI_NormalScale = exp(AdjUpper);
+LowerCI_NormalScale = exp(AdjLower);
 if AdjP <= 0.05;
 run;
+
+proc sort data=StatisticallySigDiffs;
+by AdjP descending Estimate_NormalScale;
+run;
+
+proc print data=StatisticallySigDiffs;
+var KitchenQual Neighborhood _KitchenQual _Neighborhood Adjp Estimate_NormalScale UpperCI_NormalScale LowerCI_NormalScale;
+run;
+
 
 
