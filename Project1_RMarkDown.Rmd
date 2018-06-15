@@ -205,7 +205,7 @@ summary(modelfit_with_interactions)$adj.r.squared
 ```{r, echo = FALSE, include = FALSE}
 #Remove High Leverage Points and Cooks D and create new train set from  this
 
-cooksd <- cooks.distance(modelfit1)
+cooksd <- cooks.distance(modelfit_all_field)
 
 
 sample_size <- nrow(xtrain)
@@ -229,6 +229,36 @@ names(ytrain) <- c("SalePrice")
 ```
 
 
+```{r Regression models, echo=FALSE, include = FALSE}
+# retraining the models after removing the influential data points (imporoves the adjusted R^2)
+
+#Running an initial regression model with all the data
+modelfit_all_field <- lm(ytrain$SalePrice ~ ., data = xtrain[,-1])
+summary(modelfit_all_field)
+#Adjusted R-squared:  increased from 0.9179 to 0.9587
+print("modelfit_all_field: ")
+summary(modelfit_all_field)$adj.r.squared
+
+# Testing model interactions from problem 2 analysis
+modelfit_without_interactions <- lm(ytrain$SalePrice ~ MSSubClass + MSZoning + LotFrontage + LotArea + Street +  LotShape + LandContour + Utilities + LotConfig + LandSlope + Neighborhood + Condition1 + Condition2 + BldgType + HouseStyle + OverallQual + OverallCond + YearBuilt + YearRemodAdd + RoofStyle + RoofMatl + Exterior1st + Exterior2nd + MasVnrType + MasVnrArea + ExterQual + ExterCond + Foundation + BsmtQual + BsmtCond + BsmtExposure + BsmtFinType1 + BsmtFinSF1 + BsmtFinType2 + BsmtFinSF2 + BsmtUnfSF + TotalBsmtSF + Heating + HeatingQC + CentralAir + Electrical + xtrain$X1stFlrSF + xtrain$X2ndFlrSF + LowQualFinSF + GrLivArea + BsmtFullBath + BsmtHalfBath + FullBath + HalfBath + BedroomAbvGr + KitchenAbvGr + KitchenQual + TotRmsAbvGrd + Functional + Fireplaces + FireplaceQu + GarageType + GarageYrBlt + GarageFinish + GarageCars + GarageArea + GarageQual + GarageCond + PavedDrive + WoodDeckSF + OpenPorchSF + EnclosedPorch + xtrain$X3SsnPorch + ScreenPorch + PoolArea +  Fence +  MiscVal + MoSold + YrSold + SaleType + SaleCondition, data = xtrain[,-1])
+
+#Adjusted R-squared:  increased from 0.9179 to 0.9587
+print("modelfit_without_interactions: ")
+summary(modelfit_without_interactions)$adj.r.squared
+
+modelfit_with_interactions    <- lm(ytrain$SalePrice ~ MSSubClass + MSZoning + LotFrontage + LotArea + Street +  LotShape + LandContour + Utilities + LotConfig + LandSlope + Neighborhood + Condition1 + Condition2 + BldgType + HouseStyle + OverallQual + OverallCond + YearBuilt + YearRemodAdd + RoofStyle + RoofMatl + Exterior1st + Exterior2nd + MasVnrType + MasVnrArea + ExterQual + ExterCond + Foundation + BsmtQual + BsmtCond + BsmtExposure + BsmtFinType1 + BsmtFinSF1 + BsmtFinType2 + BsmtFinSF2 + BsmtUnfSF + TotalBsmtSF + Heating + HeatingQC + CentralAir + Electrical + xtrain$X1stFlrSF + xtrain$X2ndFlrSF + LowQualFinSF + GrLivArea + BsmtFullBath + BsmtHalfBath + FullBath + HalfBath + BedroomAbvGr + KitchenAbvGr + KitchenQual + TotRmsAbvGrd + Functional + Fireplaces + FireplaceQu + GarageType + GarageYrBlt + GarageFinish + GarageCars + GarageArea + GarageQual + GarageCond + PavedDrive + WoodDeckSF + OpenPorchSF + EnclosedPorch + xtrain$X3SsnPorch + ScreenPorch + PoolArea +  Fence +  MiscVal + MoSold + YrSold + SaleType + SaleCondition +
+                  # Iteraction terms
+                  KitchenQual * Neighborhood +
+                  SaleCondition * Neighborhood +
+                  OverallCond * OverallQual +
+                  GarageYrBlt * GarageCars * GarageArea,
+data = xtrain[,-1])
+
+# Adjusted R-squared:  increased from 0.9313 to 0.9611
+print("modelfit_with_interactions: ")
+summary(modelfit_with_interactions)$adj.r.squared
+
+```
 
 
 ```{r, echo = FALSE, include = FALSE}
@@ -345,5 +375,6 @@ So far we've created four regression models
 *** SaleCondition * Neighborhood
 *** OverallCond * OverallQual
 *** GarageYrBlt * GarageCars * GarageArea
+** (Samira) Re-trained the linear models after removing the influenctial datapoints and it increased the adjusted R-squared for the model with interactions form 0.9313 to 0.9611. This means adding the three interaction terms along with removing influential points improves the adjusted R-squared from 0.9179 to 0.9611.
 * Clean up and prep final doc within the rmarkdown? - Samira? 
 * Perform the 2-way ANOVA analysis for the second part of the project assignment  --Rajat
