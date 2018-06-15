@@ -1,23 +1,20 @@
 ---
-title: "Untitled"
-author: 'Rene Pineda, '
+title: "Project1"
+author: 'Jonathan Marin, Rajat Chandna, Rene Alvarenga, Samira Zarandioon'
 date: "June 11, 2018"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
-#MSDS 6371 Project 1
 
-## Setup and Loading packagges
-
-```{r setup, echo=FALSE}
+```{r setup, echo=FALSE, include = FALSE}
 list.of.packages <- c("sqldf", "glmnet", "gfortran", "rgl", "CVST", "igraph", "recipes", "ggplot2", "caret", "forcats", "olsrr", "tidyr", "corrplot", "parallel", "doParallel")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages, repos="http://cran.r-project.org")
 ```
 
-```{r setup, echo=FALSE}
+```{r echo=FALSE, include = FALSE}
 
 #Load the data
 train <- read.csv("train.csv")
@@ -41,9 +38,7 @@ library(doParallel)#Using to assign more cores and allow parallel processing
 
 
 
-## Data cleaning and preparation
-
-```{r data preparation, echo=FALSE}
+```{r data preparation, echo=FALSE, include = FALSE}
 
 
 #Going to assign more cores to R and leave one for OS. Not sure if it will help feature selection
@@ -135,10 +130,9 @@ xtest <- sqldf("select * from data where SalePrice = 0")
 xtest$SalePrice <- NULL
 ```
 
-## Some exploratory Analysis
 
 
-```{r Corr Matrix and Scatterplots, echo=FALSE}
+```{r Corr Matrix and Scatterplots, echo=FALSE, include = FALSE}
 #Correlation matrix
 #The following variables will be included in the matrix: Lot Frontage, Lot Area, Year Built, Year Remod/Add, 
 #Mas Vnr Area, Bsmt Fin SF 1, BsmtFin SF 2, Bsmt Unf SF, Total Bsmt SF, 1st Flr SF, 2nd Flr SF, Low Qual Fin SF,
@@ -176,16 +170,8 @@ for (variable in c(2,75,25,6,8,14,29)){
 
 
 
-##Regression Models
 
-So far we've created four regression models
-* Initial model with all variables: modelfit1
-* LASSO model
-* Forward selection model using p-values as criteria: modelfoward
-* Backward selection model using p-values as criteria: modelbackward
-* Stepwise selection model using p-values as criteria: modelstepwise
-
-```{r Regression models, echo=FALSE}
+```{r Regression models, echo=FALSE, include = FALSE}
 #Running an initial regression model with all the data
 modelfit1 <- lm(ytrain$SalePrice ~ ., data = xtrain[,-1])
 summary(modelfit1)
@@ -207,9 +193,8 @@ summary(modelfit3)
 ```
 
 
-##Outlier Analysis
 
-```{r}
+```{r, echo = FALSE, include = FALSE}
 #Remove High Leverage Points and Cooks D and create new train set from  this
 
 cooksd <- cooks.distance(modelfit1)
@@ -236,10 +221,9 @@ names(ytrain) <- c("SalePrice")
 ```
 
 
-#Lasso Model
 
 
-```{r}
+```{r, echo = FALSE, include = FALSE}
 `%ni%` <- Negate(`%in%`)
 
 x = model.matrix(ytrain$SalePrice~., data = xtrain[,-1]) 
@@ -306,6 +290,36 @@ summary(stepwise.mass)
 #plot(modelstepwise)
 
 ```
+
+
+#MSDS 6371 Project 1
+
+## Setup and Loading packagges
+
+
+
+## Data cleaning and preparation
+
+
+## Some exploratory Analysis
+
+
+##Regression Models
+
+
+So far we've created four regression models
+* Initial model with all variables: modelfit1
+* LASSO model
+* Forward selection model using p-values as criteria: modelfoward
+* Backward selection model using p-values as criteria: modelbackward
+* Stepwise selection model using p-values as criteria: modelstepwise
+
+
+##Outlier Analysis
+
+
+#Lasso Model
+
 
 ##Pending tasks
 * Run several models from all the selection processes. - Rene 
