@@ -243,7 +243,14 @@ library(MASS)
 
 #Forward selection model
 model <- lm(ytrain$SalePrice ~ ., data = xtrain[,-1])  #added [,-1] part so that we remove the id from model
-modelforward <- ols_step_forward(model)  #Took out the _p from this and it worked
+modelforward <- tryCatch({
+    ols_step_forward(model)
+}, warning = function(w) {
+    ols_step_forward_p(model)
+}, error = function(e) {
+    ols_step_forward_p(model)
+})
+
 modelforward
 summary(modelforward)
 
