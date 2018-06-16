@@ -38,7 +38,7 @@ train <- read.csv("train.csv")
 test <- read.csv("test.csv")
 
 # Generate histogram of Sale Price
-hist(train$SalePrice, data = train, main = "Historgram of Sale Price", xlab = "Sale Price in US$")
+hist(train$SalePrice, main = "Historgram of Sale Price", xlab = "Sale Price in US$")
 
 #Inspect the data
 dim(train)
@@ -54,7 +54,7 @@ str(train)
 train$SalePrice <- log(train$SalePrice)
 
 # Generate histogram of log of Sale Price
-hist(train$SalePrice, data = train, main = "Historgram of natural log of Sale Price", xlab = "Natural log of Sale Price in US$")
+hist(train$SalePrice, main = "Historgram of natural log of Sale Price", xlab = "Natural log of Sale Price in US$")
 
 ```
 
@@ -146,7 +146,7 @@ xtest$SalePrice <- NULL
 #Create some histograms
 
 par(mfrow=c(2,2))
-plot(h1)
+hist(train$SalePrice, main = "Historgram of natural log of Sale Price", xlab = "Natural log of Sale Price in US$")
 hist(train$GrLivArea, main = "Histogram of GrLivArea", xlab = "Area in Square Feet")
 hist(train$YearBuilt, main = "Histogram of Year Built", xlab = "Year in which the House was built")
 hist(train$BedroomAbvGr, main = "Histogram of Bedrroms", xlab = "Number of Bedrooms")
