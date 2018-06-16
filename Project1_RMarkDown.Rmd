@@ -38,14 +38,23 @@ train <- read.csv("train.csv")
 test <- read.csv("test.csv")
 
 # Generate histogram of Sale Price
-h1 <- hist(train$SalePrice, data = train, main = "Historgram of Sale Price", xlab = "Sale Price in US$")
-
-# Perform natural logarithm on response variable.
-train$SalePrice <- log(train$SalePrice)
+hist(train$SalePrice, data = train, main = "Historgram of Sale Price", xlab = "Sale Price in US$")
 
 #Inspect the data
 dim(train)
 str(train)
+
+```
+
+```{r echo=FALSE, include = FALSE}
+
+# Log transform the sales price
+
+# Perform natural logarithm on response variable.
+train$SalePrice <- log(train$SalePrice)
+
+# Generate histogram of log of Sale Price
+hist(train$SalePrice, data = train, main = "Historgram of natural log of Sale Price", xlab = "Natural log of Sale Price in US$")
 
 ```
 
