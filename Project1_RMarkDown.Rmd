@@ -69,8 +69,8 @@ sapply(train, function(x) sum(is.na(x)))
 #LotFrontage, Alley, MasVnrType, MasVnrArea, BsmtQual, BstCond, BsmtExposure, BsmtFinType1, BsmtFinType2,
 #FireplaceQu, GarageType, GarageYrBlt, GarageFinish, GarageCond, Fence, MiscFeature, PoolQC
 
-#Adding sale price to the test set for combining
-test$SalePrice <- 0  
+#Adding sale price to the test set for combining (using impossible value of -1 to distinguish between train and test data)
+test$SalePrice <- -1  
 
 #Join the train and test sets for preprocessing
 data <- rbind(train, test)
@@ -83,10 +83,8 @@ data$PoolQC <- NULL # Missing value in 99.7% of observations
 #Variables with values as NA
 NAFeatures = names(which(colSums(is.na(data))>0))
 
-#Get the median lot frontage and update where NA
-median(train$LotFrontage, na.rm = TRUE)  # This ends up being 69.  Going to update the NA 
-
-data$LotFrontage[is.na(data$LotFrontage)] <-69
+# use median imputation to handle missing LotFrontage data
+data$LotFrontage[is.na(data$LotFrontage)] <- median(train$LotFrontage, na.rm = TRUE) #69
 
 #If NA for GarageYrBlt, then set to YearBuilt of house
 data$GarageYrBlt[is.na(data$GarageYrBlt)] <-  as.integer(data$YearBuilt)
@@ -131,13 +129,13 @@ data$Functional <- replaceNAfactor(data$Functional, "Typ")
 sapply(data, function(x) sum(is.na(x)))
 
 #Resplitting train and test
-xtrain <- as.data.frame(sqldf("select * from data where SalePrice <> 0"))
-ytrain <- sqldf("select SalePrice from data where SalePrice <> 0")
+xtrain <- as.data.frame(sqldf("select * from data where SalePrice <> -1"))
+ytrain <- sqldf("select SalePrice from data where SalePrice <> 1-")
 names(ytrain) <- c("SalePrice")
 
 xtrain$SalePrice <- NULL
 
-xtest <- sqldf("select * from data where SalePrice = 0")
+xtest <- sqldf("select * from data where SalePrice = -1")
 
 xtest$SalePrice <- NULL
 ```
