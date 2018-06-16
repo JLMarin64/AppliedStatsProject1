@@ -47,6 +47,10 @@ library(doParallel)#Using to assign more cores and allow parallel processing
 cluster <- makeCluster(detectCores()-1)
 registerDoParallel(cluster)
 
+fitControl <- trainControl(method = "cv",
+                           number = 2,
+                           allowParallel = TRUE)
+
 #This shows us what is null
 sapply(train, function(x) sum(is.na(x)))
 
@@ -168,12 +172,16 @@ for (variable in c(2,75,25,6,8,14,29)){
 
 
 
-```{r Regression models, echo=FALSE, include = FALSE}
+```{r Regression models, echo=FALSE, include = FALSE, warning= FALSE}
 #Running an initial regression model with all the data
 modelfit_all_fields <- lm(ytrain$SalePrice ~ ., data = xtrain[,-1])
 summary(modelfit_all_fields)
 
 hist(ytrain$SalePrice)
+
+
+plot(modelfit_all_fields)
+
 
 #Making the log transformation to SalePrice
 ytrain$SalePrice <- log(ytrain$SalePrice)
@@ -304,14 +312,6 @@ model_stepwise_selection = train(SalePrice ~ .,
               trControl = trainControl)
 
 
-models_list = list(model_all_fields = model_all_fields,
-                  model_without_interactions = model_without_interactions,
-                  model_with_interactions = model_with_interactions,
-                  model_forward_selection = model_forward_selection,
-                  model_backward_selection = model_backward_selection,
-                  model_stepwise_selection = model_stepwise_selection)
-resamples = resamples(models_list)
-summary(resamples)
 ```
 
 
@@ -392,6 +392,20 @@ summary(stepwise.mass)
 #modelstepwise <- ols_step_both(model)
 #modelstepwise
 #plot(modelstepwise)
+
+
+models_list = list(model_all_fields = model_all_fields,
+                  model_without_interactions = model_without_interactions,
+                  model_with_interactions = model_with_interactions,
+                  model_forward_selection = model_forward_selection,
+                  model_backward_selection = model_backward_selection,
+                  model_stepwise_selection = model_stepwise_selection,
+                  forward.mass  = forward.mass,
+                  backward.mass = backward.mass,
+                  stepwise.mass = stepwise.mass)
+resamples = resamples(models_list)
+summary(resamples)
+
 
 ```
 
