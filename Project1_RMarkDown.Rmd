@@ -47,9 +47,6 @@ library(doParallel)#Using to assign more cores and allow parallel processing
 cluster <- makeCluster(detectCores()-1)
 registerDoParallel(cluster)
 
-fitControl <- trainControl(method = "cv", number = 3, allowParallel = TRUE)
-
-
 #This shows us what is null
 sapply(train, function(x) sum(is.na(x)))
 
