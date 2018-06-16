@@ -130,7 +130,7 @@ sapply(data, function(x) sum(is.na(x)))
 
 #Resplitting train and test
 xtrain <- as.data.frame(sqldf("select * from data where SalePrice <> -1"))
-ytrain <- sqldf("select SalePrice from data where SalePrice <> 1-")
+ytrain <- sqldf("select SalePrice from data where SalePrice <> -1")
 names(ytrain) <- c("SalePrice")
 
 xtrain$SalePrice <- NULL
