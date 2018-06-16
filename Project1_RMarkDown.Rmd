@@ -1,23 +1,21 @@
 ---
-title: "Untitled"
-author: 'Rene Pineda, '
+title: "Project1"
+author: 'Jonathan Marin, Rajat Chandna, Rene Alvarenga, Samira Zarandioon'
 date: "June 11, 2018"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
-#MSDS 6371 Project 1
 
-## Setup and Loading packagges
 
-```{r setup, echo=FALSE, warning=FALSE, message=FALSE}
+```{r setup, echo=FALSE, include = FALSE}
 list.of.packages <- c("sqldf", "glmnet", "gfortran", "rgl", "CVST", "igraph", "recipes", "ggplot2", "caret", "forcats", "olsrr", "tidyr", "corrplot", "parallel", "doParallel")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages, repos="http://cran.r-project.org")
 ```
 
-```{r setup, echo=FALSE}
+```{r echo=FALSE, include = FALSE}
 
 #Load the data
 train <- read.csv("train.csv")
@@ -48,9 +46,7 @@ library(doParallel)#Using to assign more cores and allow parallel processing
 
 
 
-## Data cleaning and preparation
-
-```{r data preparation, echo=FALSE}
+```{r data preparation, echo=FALSE, include = FALSE}
 
 #Going to assign more cores to R and leave one for OS. Not sure if it will help feature selection
 #but worth a shot.
@@ -141,10 +137,9 @@ xtest <- sqldf("select * from data where SalePrice = 0")
 xtest$SalePrice <- NULL
 ```
 
-## Some exploratory Analysis
 
 
-```{r Corr Matrix and Scatterplots, echo=FALSE}
+```{r Corr Matrix and Scatterplots, echo=FALSE, include = FALSE}
 #Create some histograms
 
 par(mfrow=c(2,2))
@@ -223,33 +218,46 @@ So far we've created four regression models
 * Forward selection model using p-values as criteria: modelfoward
 * Backward selection model using p-values as criteria: modelbackward
 * Stepwise selection model using p-values as criteria: modelstepwise
+=======
 
-```{r Regression models, echo=FALSE}
+```{r Regression models, echo=FALSE, include = FALSE}
 #Running an initial regression model with all the data
-modelfit1 <- lm(ytrain$SalePrice ~ ., data = xtrain[,-1])
-summary(modelfit1)
-#R^2 is .937
-summary(modelfit1)$adj.r.squared
-
-
+modelfit_all_field <- lm(ytrain$SalePrice ~ ., data = xtrain[,-1])
+summary(modelfit_all_field)
+#Adjusted R-squared:  0.9179
+print("modelfit_all_field: ")
+summary(modelfit_all_field)$adj.r.squared
 
 # Testing model interactions from problem 2 analysis
-modelfit2 <- lm(ytrain$SalePrice ~ MSSubClass + MSZoning + LotFrontage + LotArea + Street +  LotShape + LandContour + Utilities + LotConfig + LandSlope + Neighborhood + Condition1 + Condition2 + BldgType + HouseStyle + OverallQual + OverallCond + YearBuilt + YearRemodAdd + RoofStyle + RoofMatl + Exterior1st + Exterior2nd + MasVnrType + MasVnrArea + ExterQual + ExterCond + Foundation + BsmtQual + BsmtCond + BsmtExposure + BsmtFinType1 + BsmtFinSF1 + BsmtFinType2 + BsmtFinSF2 + BsmtUnfSF + TotalBsmtSF + Heating + HeatingQC + CentralAir + Electrical + xtrain$X1stFlrSF + xtrain$X2ndFlrSF + LowQualFinSF + GrLivArea + BsmtFullBath + BsmtHalfBath + FullBath + HalfBath + BedroomAbvGr + KitchenAbvGr + KitchenQual + TotRmsAbvGrd + Functional + Fireplaces + FireplaceQu + GarageType + GarageYrBlt + GarageFinish + GarageCars + GarageArea + GarageQual + GarageCond + PavedDrive + WoodDeckSF + OpenPorchSF + EnclosedPorch + xtrain$X3SsnPorch + ScreenPorch + PoolArea +  Fence +  MiscVal + MoSold + YrSold + SaleType + SaleCondition + KitchenQual * Neighborhood, data = xtrain[,-1])
+modelfit_without_interactions <- lm(ytrain$SalePrice ~ MSSubClass + MSZoning + LotFrontage + LotArea + Street +  LotShape + LandContour + Utilities + LotConfig + LandSlope + Neighborhood + Condition1 + Condition2 + BldgType + HouseStyle + OverallQual + OverallCond + YearBuilt + YearRemodAdd + RoofStyle + RoofMatl + Exterior1st + Exterior2nd + MasVnrType + MasVnrArea + ExterQual + ExterCond + Foundation + BsmtQual + BsmtCond + BsmtExposure + BsmtFinType1 + BsmtFinSF1 + BsmtFinType2 + BsmtFinSF2 + BsmtUnfSF + TotalBsmtSF + Heating + HeatingQC + CentralAir + Electrical + xtrain$X1stFlrSF + xtrain$X2ndFlrSF + LowQualFinSF + GrLivArea + BsmtFullBath + BsmtHalfBath + FullBath + HalfBath + BedroomAbvGr + KitchenAbvGr + KitchenQual + TotRmsAbvGrd + Functional + Fireplaces + FireplaceQu + GarageType + GarageYrBlt + GarageFinish + GarageCars + GarageArea + GarageQual + GarageCond + PavedDrive + WoodDeckSF + OpenPorchSF + EnclosedPorch + xtrain$X3SsnPorch + ScreenPorch + PoolArea +  Fence +  MiscVal + MoSold + YrSold + SaleType + SaleCondition, data = xtrain[,-1])
 
-summary(modelfit2)
+#Adjusted R-squared:  0.9179
+print("modelfit_without_interactions: ")
+summary(modelfit_without_interactions)$adj.r.squared
 
 modelfit3 <- lm(ytrain$SalePrice ~ MSSubClass + MSZoning + LotFrontage + LotArea + Street +  LotShape + LandContour + Utilities + LotConfig + LandSlope + Neighborhood + Condition1 + Condition2 + BldgType + HouseStyle + OverallQual + OverallCond + YearBuilt + YearRemodAdd + RoofStyle + RoofMatl + Exterior1st + Exterior2nd + MasVnrType + MasVnrArea + ExterQual + ExterCond + Foundation + BsmtQual + BsmtCond + BsmtExposure + BsmtFinType1 + BsmtFinSF1 + BsmtFinType2 + BsmtFinSF2 + BsmtUnfSF + TotalBsmtSF + Heating + HeatingQC + CentralAir + Electrical + xtrain$X1stFlrSF + xtrain$X2ndFlrSF + LowQualFinSF + GrLivArea + BsmtFullBath + BsmtHalfBath + FullBath + HalfBath + BedroomAbvGr + KitchenAbvGr + KitchenQual + TotRmsAbvGrd + Functional + Fireplaces + FireplaceQu + GarageType + GarageYrBlt + GarageFinish + GarageCars + GarageArea + GarageQual + GarageCond + PavedDrive + WoodDeckSF + OpenPorchSF + EnclosedPorch + xtrain$X3SsnPorch + ScreenPorch + PoolArea +  Fence +  MiscVal + MoSold + YrSold + SaleType + SaleCondition + KitchenQual * Neighborhood + SaleCondition * Neighborhood , data = xtrain[,-1])
 
 summary(modelfit3)
+
+modelfit_with_interactions    <- lm(ytrain$SalePrice ~ MSSubClass + MSZoning + LotFrontage + LotArea + Street +  LotShape + LandContour + Utilities + LotConfig + LandSlope + Neighborhood + Condition1 + Condition2 + BldgType + HouseStyle + OverallQual + OverallCond + YearBuilt + YearRemodAdd + RoofStyle + RoofMatl + Exterior1st + Exterior2nd + MasVnrType + MasVnrArea + ExterQual + ExterCond + Foundation + BsmtQual + BsmtCond + BsmtExposure + BsmtFinType1 + BsmtFinSF1 + BsmtFinType2 + BsmtFinSF2 + BsmtUnfSF + TotalBsmtSF + Heating + HeatingQC + CentralAir + Electrical + xtrain$X1stFlrSF + xtrain$X2ndFlrSF + LowQualFinSF + GrLivArea + BsmtFullBath + BsmtHalfBath + FullBath + HalfBath + BedroomAbvGr + KitchenAbvGr + KitchenQual + TotRmsAbvGrd + Functional + Fireplaces + FireplaceQu + GarageType + GarageYrBlt + GarageFinish + GarageCars + GarageArea + GarageQual + GarageCond + PavedDrive + WoodDeckSF + OpenPorchSF + EnclosedPorch + xtrain$X3SsnPorch + ScreenPorch + PoolArea +  Fence +  MiscVal + MoSold + YrSold + SaleType + SaleCondition +
+                  # Iteraction terms
+                  KitchenQual * Neighborhood +
+                  SaleCondition * Neighborhood +
+                  OverallCond * OverallQual +
+                  GarageYrBlt * GarageCars * GarageArea,
+data = xtrain[,-1])
+
+# Adjusted R-squared:  0.9313
+print("modelfit_with_interactions: ")
+summary(modelfit_with_interactions)$adj.r.squared
 ```
 
 
-##Outlier Analysis
 
-```{r}
+```{r, echo = FALSE, include = FALSE}
 #Remove High Leverage Points and Cooks D and create new train set from  this
 
-cooksd <- cooks.distance(modelfit1)
+cooksd <- cooks.distance(modelfit_all_field)
 
 
 sample_size <- nrow(xtrain)
@@ -273,10 +281,39 @@ names(ytrain) <- c("SalePrice")
 ```
 
 
-#Lasso Model
+```{r Regression models, echo=FALSE, include = FALSE}
+# retraining the models after removing the influential data points (imporoves the adjusted R^2)
+
+#Running an initial regression model with all the data
+modelfit_all_field <- lm(ytrain$SalePrice ~ ., data = xtrain[,-1])
+summary(modelfit_all_field)
+#Adjusted R-squared:  increased from 0.9179 to 0.9587
+print("modelfit_all_field: ")
+summary(modelfit_all_field)$adj.r.squared
+
+# Testing model interactions from problem 2 analysis
+modelfit_without_interactions <- lm(ytrain$SalePrice ~ MSSubClass + MSZoning + LotFrontage + LotArea + Street +  LotShape + LandContour + Utilities + LotConfig + LandSlope + Neighborhood + Condition1 + Condition2 + BldgType + HouseStyle + OverallQual + OverallCond + YearBuilt + YearRemodAdd + RoofStyle + RoofMatl + Exterior1st + Exterior2nd + MasVnrType + MasVnrArea + ExterQual + ExterCond + Foundation + BsmtQual + BsmtCond + BsmtExposure + BsmtFinType1 + BsmtFinSF1 + BsmtFinType2 + BsmtFinSF2 + BsmtUnfSF + TotalBsmtSF + Heating + HeatingQC + CentralAir + Electrical + xtrain$X1stFlrSF + xtrain$X2ndFlrSF + LowQualFinSF + GrLivArea + BsmtFullBath + BsmtHalfBath + FullBath + HalfBath + BedroomAbvGr + KitchenAbvGr + KitchenQual + TotRmsAbvGrd + Functional + Fireplaces + FireplaceQu + GarageType + GarageYrBlt + GarageFinish + GarageCars + GarageArea + GarageQual + GarageCond + PavedDrive + WoodDeckSF + OpenPorchSF + EnclosedPorch + xtrain$X3SsnPorch + ScreenPorch + PoolArea +  Fence +  MiscVal + MoSold + YrSold + SaleType + SaleCondition, data = xtrain[,-1])
+
+#Adjusted R-squared:  increased from 0.9179 to 0.9587
+print("modelfit_without_interactions: ")
+summary(modelfit_without_interactions)$adj.r.squared
+
+modelfit_with_interactions    <- lm(ytrain$SalePrice ~ MSSubClass + MSZoning + LotFrontage + LotArea + Street +  LotShape + LandContour + Utilities + LotConfig + LandSlope + Neighborhood + Condition1 + Condition2 + BldgType + HouseStyle + OverallQual + OverallCond + YearBuilt + YearRemodAdd + RoofStyle + RoofMatl + Exterior1st + Exterior2nd + MasVnrType + MasVnrArea + ExterQual + ExterCond + Foundation + BsmtQual + BsmtCond + BsmtExposure + BsmtFinType1 + BsmtFinSF1 + BsmtFinType2 + BsmtFinSF2 + BsmtUnfSF + TotalBsmtSF + Heating + HeatingQC + CentralAir + Electrical + xtrain$X1stFlrSF + xtrain$X2ndFlrSF + LowQualFinSF + GrLivArea + BsmtFullBath + BsmtHalfBath + FullBath + HalfBath + BedroomAbvGr + KitchenAbvGr + KitchenQual + TotRmsAbvGrd + Functional + Fireplaces + FireplaceQu + GarageType + GarageYrBlt + GarageFinish + GarageCars + GarageArea + GarageQual + GarageCond + PavedDrive + WoodDeckSF + OpenPorchSF + EnclosedPorch + xtrain$X3SsnPorch + ScreenPorch + PoolArea +  Fence +  MiscVal + MoSold + YrSold + SaleType + SaleCondition +
+                  # Iteraction terms
+                  KitchenQual * Neighborhood +
+                  SaleCondition * Neighborhood +
+                  OverallCond * OverallQual +
+                  GarageYrBlt * GarageCars * GarageArea,
+data = xtrain[,-1])
+
+# Adjusted R-squared:  increased from 0.9313 to 0.9611
+print("modelfit_with_interactions: ")
+summary(modelfit_with_interactions)$adj.r.squared
+
+```
 
 
-```{r}
+```{r, echo = FALSE, include = FALSE}
 `%ni%` <- Negate(`%in%`)
 
 x = model.matrix(ytrain$SalePrice~., data = xtrain[,-1]) 
@@ -296,7 +333,14 @@ library(MASS)
 
 #Forward selection model
 model <- lm(ytrain$SalePrice ~ ., data = xtrain[,-1])  #added [,-1] part so that we remove the id from model
-modelforward <- ols_step_forward(model)  #Took out the _p from this and it worked
+modelforward <- tryCatch({
+    ols_step_forward(model)
+}, warning = function(w) {
+    ols_step_forward_p(model)
+}, error = function(e) {
+    ols_step_forward_p(model)
+})
+
 modelforward
 summary(modelforward)
 
@@ -326,9 +370,45 @@ stepwise.mass <- stepAIC(model, direction = "both", trace = FALSE, steps = 500)
 summary(stepwise.mass)
 ```
 
+
+#MSDS 6371 Project 1
+
+## Setup and Loading packagges
+
+
+
+## Data cleaning and preparation
+
+
+## Some exploratory Analysis
+
+
+##Regression Models
+
+
+So far we've created four regression models
+* Initial model with all variables: modelfit1
+* LASSO model
+* Forward selection model using p-values as criteria: modelfoward
+* Backward selection model using p-values as criteria: modelbackward
+* Stepwise selection model using p-values as criteria: modelstepwise
+
+
+##Outlier Analysis
+
+
+#Lasso Model
+
+
 ##Pending tasks
 * Run several models from all the selection processes. - Rene 
 * Create table comparing comparing AIC or R^2 from all models, and make decision - Rene
-* Enter interaction terms (ex:  GarageYrBuilt * GarageCars * GarageArea ) -- Samira?
+* Enter interaction terms (ex:  GarageYrBuilt * GarageCars * GarageArea ) -- Samira (DONE!)
+** I added the following interaction terms, which improved adjusted $R^2$ from 0.9179 to 0.9313
+*** KitchenQual * Neighborhood
+*** SaleCondition * Neighborhood
+*** OverallCond * OverallQual
+*** GarageYrBlt * GarageCars * GarageArea
+** (Samira) Re-trained the linear models after removing the influenctial datapoints and it increased the adjusted R-squared for the model with interactions form 0.9313 to 0.9611. This means adding the three interaction terms along with removing influential points improves the adjusted R-squared from 0.9179 to 0.9611.
 * Clean up and prep final doc within the rmarkdown? - Samira? 
 * Perform the 2-way ANOVA analysis for the second part of the project assignment  --Rajat
