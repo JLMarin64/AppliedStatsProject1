@@ -1,10 +1,10 @@
 ---
 title: "Project1"
-author: 'Jonathan Marin, Rajat Chandna, Rene Alvarenga, Samira Zarandioon'
+author: "Jonathan Marin, Rajat Chandna, Rene Alvarenga, Samira Zarandioon"
 date: "June 11, 2018"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 ---
 
 
@@ -46,7 +46,7 @@ library(doParallel)#Using to assign more cores and allow parallel processing
 
 
 
-```{r data preparation, echo=FALSE, include = FALSE}
+```{r Data Preparation, echo=FALSE, include = FALSE, warning = FALSE}
 
 #Going to assign more cores to R and leave one for OS. Not sure if it will help feature selection
 #but worth a shot.
@@ -54,8 +54,9 @@ library(doParallel)#Using to assign more cores and allow parallel processing
 cluster <- makeCluster(detectCores()-1)
 registerDoParallel(cluster)
 
-fitControl <- trainControl(method = "cv", number = 3, allowParallel = TRUE)
-
+fitControl <- trainControl(method = "cv",
+                           number = 2,
+                           allowParallel = TRUE)
 
 #This shows us what is null
 sapply(train, function(x) sum(is.na(x)))
@@ -220,13 +221,23 @@ So far we've created four regression models
 * Stepwise selection model using p-values as criteria: modelstepwise
 =======
 
-```{r Regression models, echo=FALSE, include = FALSE}
+```{r Regression models, echo=FALSE, include = FALSE, warning= FALSE}
 #Running an initial regression model with all the data
-modelfit_all_field <- lm(ytrain$SalePrice ~ ., data = xtrain[,-1])
-summary(modelfit_all_field)
+modelfit_all_fields <- lm(ytrain$SalePrice ~ ., data = xtrain[,-1])
+summary(modelfit_all_fields)
+
+hist(ytrain$SalePrice)
+
+
+plot(modelfit_all_fields)
+
+
+#Making the log transformation to SalePrice
+ytrain$SalePrice <- log(ytrain$SalePrice)
+
 #Adjusted R-squared:  0.9179
-print("modelfit_all_field: ")
-summary(modelfit_all_field)$adj.r.squared
+print("modelfit_all_fields: ")
+summary(modelfit_all_fields)$adj.r.squared
 
 # Testing model interactions from problem 2 analysis
 modelfit_without_interactions <- lm(ytrain$SalePrice ~ MSSubClass + MSZoning + LotFrontage + LotArea + Street +  LotShape + LandContour + Utilities + LotConfig + LandSlope + Neighborhood + Condition1 + Condition2 + BldgType + HouseStyle + OverallQual + OverallCond + YearBuilt + YearRemodAdd + RoofStyle + RoofMatl + Exterior1st + Exterior2nd + MasVnrType + MasVnrArea + ExterQual + ExterCond + Foundation + BsmtQual + BsmtCond + BsmtExposure + BsmtFinType1 + BsmtFinSF1 + BsmtFinType2 + BsmtFinSF2 + BsmtUnfSF + TotalBsmtSF + Heating + HeatingQC + CentralAir + Electrical + xtrain$X1stFlrSF + xtrain$X2ndFlrSF + LowQualFinSF + GrLivArea + BsmtFullBath + BsmtHalfBath + FullBath + HalfBath + BedroomAbvGr + KitchenAbvGr + KitchenQual + TotRmsAbvGrd + Functional + Fireplaces + FireplaceQu + GarageType + GarageYrBlt + GarageFinish + GarageCars + GarageArea + GarageQual + GarageCond + PavedDrive + WoodDeckSF + OpenPorchSF + EnclosedPorch + xtrain$X3SsnPorch + ScreenPorch + PoolArea +  Fence +  MiscVal + MoSold + YrSold + SaleType + SaleCondition, data = xtrain[,-1])
@@ -257,7 +268,7 @@ summary(modelfit_with_interactions)$adj.r.squared
 ```{r, echo = FALSE, include = FALSE}
 #Remove High Leverage Points and Cooks D and create new train set from  this
 
-cooksd <- cooks.distance(modelfit_all_field)
+cooksd <- cooks.distance(modelfit_all_fields)
 
 
 sample_size <- nrow(xtrain)
@@ -281,15 +292,15 @@ names(ytrain) <- c("SalePrice")
 ```
 
 
-```{r Regression models, echo=FALSE, include = FALSE}
+```{r Regression models2, echo=FALSE, include = FALSE}
 # retraining the models after removing the influential data points (imporoves the adjusted R^2)
 
 #Running an initial regression model with all the data
-modelfit_all_field <- lm(ytrain$SalePrice ~ ., data = xtrain[,-1])
-summary(modelfit_all_field)
+modelfit_all_fields <- lm(ytrain$SalePrice ~ ., data = xtrain[,-1])
+summary(modelfit_all_fields)
 #Adjusted R-squared:  increased from 0.9179 to 0.9587
-print("modelfit_all_field: ")
-summary(modelfit_all_field)$adj.r.squared
+print("modelfit_all_fields: ")
+summary(modelfit_all_fields)$adj.r.squared
 
 # Testing model interactions from problem 2 analysis
 modelfit_without_interactions <- lm(ytrain$SalePrice ~ MSSubClass + MSZoning + LotFrontage + LotArea + Street +  LotShape + LandContour + Utilities + LotConfig + LandSlope + Neighborhood + Condition1 + Condition2 + BldgType + HouseStyle + OverallQual + OverallCond + YearBuilt + YearRemodAdd + RoofStyle + RoofMatl + Exterior1st + Exterior2nd + MasVnrType + MasVnrArea + ExterQual + ExterCond + Foundation + BsmtQual + BsmtCond + BsmtExposure + BsmtFinType1 + BsmtFinSF1 + BsmtFinType2 + BsmtFinSF2 + BsmtUnfSF + TotalBsmtSF + Heating + HeatingQC + CentralAir + Electrical + xtrain$X1stFlrSF + xtrain$X2ndFlrSF + LowQualFinSF + GrLivArea + BsmtFullBath + BsmtHalfBath + FullBath + HalfBath + BedroomAbvGr + KitchenAbvGr + KitchenQual + TotRmsAbvGrd + Functional + Fireplaces + FireplaceQu + GarageType + GarageYrBlt + GarageFinish + GarageCars + GarageArea + GarageQual + GarageCond + PavedDrive + WoodDeckSF + OpenPorchSF + EnclosedPorch + xtrain$X3SsnPorch + ScreenPorch + PoolArea +  Fence +  MiscVal + MoSold + YrSold + SaleType + SaleCondition, data = xtrain[,-1])
@@ -314,6 +325,50 @@ summary(modelfit_with_interactions)$adj.r.squared
 
 
 ```{r, echo = FALSE, include = FALSE}
+train <- cbind(xtrain, ytrain)
+trainControl = trainControl(method = "cv", number = 10, verboseIter = FALSE)
+
+model_all_fields = train(SalePrice ~ ., 
+              data = train,
+              method = "lm",
+              trControl = trainControl)
+
+model_without_interactions = train(SalePrice ~ MSSubClass + MSZoning + LotFrontage + LotArea + Street +  LotShape + LandContour + Utilities + LotConfig + LandSlope + Neighborhood + Condition1 + Condition2 + BldgType + HouseStyle + OverallQual + OverallCond + YearBuilt + YearRemodAdd + RoofStyle + RoofMatl + Exterior1st + Exterior2nd + MasVnrType + MasVnrArea + ExterQual + ExterCond + Foundation + BsmtQual + BsmtCond + BsmtExposure + BsmtFinType1 + BsmtFinSF1 + BsmtFinType2 + BsmtFinSF2 + BsmtUnfSF + TotalBsmtSF + Heating + HeatingQC + CentralAir + Electrical + X1stFlrSF + X2ndFlrSF + LowQualFinSF + GrLivArea + BsmtFullBath + BsmtHalfBath + FullBath + HalfBath + BedroomAbvGr + KitchenAbvGr + KitchenQual + TotRmsAbvGrd + Functional + Fireplaces + FireplaceQu + GarageType + GarageYrBlt + GarageFinish + GarageCars + GarageArea + GarageQual + GarageCond + PavedDrive + WoodDeckSF + OpenPorchSF + EnclosedPorch + X3SsnPorch + ScreenPorch + PoolArea +  Fence +  MiscVal + MoSold + YrSold + SaleType + SaleCondition,
+              data = train,
+              method = "lm",
+              trControl = trainControl)
+
+model_with_interactions = train(SalePrice ~ MSSubClass + MSZoning + LotFrontage + LotArea + Street +  LotShape + LandContour + Utilities + LotConfig + LandSlope + Neighborhood + Condition1 + Condition2 + BldgType + HouseStyle + OverallQual + OverallCond + YearBuilt + YearRemodAdd + RoofStyle + RoofMatl + Exterior1st + Exterior2nd + MasVnrType + MasVnrArea + ExterQual + ExterCond + Foundation + BsmtQual + BsmtCond + BsmtExposure + BsmtFinType1 + BsmtFinSF1 + BsmtFinType2 + BsmtFinSF2 + BsmtUnfSF + TotalBsmtSF + Heating + HeatingQC + CentralAir + Electrical + X1stFlrSF + X2ndFlrSF + LowQualFinSF + GrLivArea + BsmtFullBath + BsmtHalfBath + FullBath + HalfBath + BedroomAbvGr + KitchenAbvGr + KitchenQual + TotRmsAbvGrd + Functional + Fireplaces + FireplaceQu + GarageType + GarageYrBlt + GarageFinish + GarageCars + GarageArea + GarageQual + GarageCond + PavedDrive + WoodDeckSF + OpenPorchSF + EnclosedPorch + X3SsnPorch + ScreenPorch + PoolArea +  Fence +  MiscVal + MoSold + YrSold + SaleType + SaleCondition +
+                  # Iteraction terms
+                  KitchenQual * Neighborhood +
+                  SaleCondition * Neighborhood,
+              data = train,
+              method = "lm",
+              trControl = trainControl)
+
+# auto feature selection
+
+model_forward_selection = train(SalePrice ~ ., 
+              data = train,
+              method = "leapForward",
+              trControl = trainControl)
+
+model_backward_selection = train(SalePrice ~ ., 
+              data = train,
+              method = "leapBackward",
+              trControl = trainControl)
+
+model_stepwise_selection = train(SalePrice ~ ., 
+              data = train,
+              method = "leapSeq",
+              trControl = trainControl)
+
+
+```
+
+
+
+```{r, echo = FALSE, include = FALSE}
 `%ni%` <- Negate(`%in%`)
 
 x = model.matrix(ytrain$SalePrice~., data = xtrain[,-1]) 
@@ -331,28 +386,32 @@ variables
 
 library(MASS)
 
-#Forward selection model
-model <- lm(ytrain$SalePrice ~ ., data = xtrain[,-1])  #added [,-1] part so that we remove the id from model
-modelforward <- tryCatch({
-    ols_step_forward(model)
-}, warning = function(w) {
-    ols_step_forward_p(model)
-}, error = function(e) {
-    ols_step_forward_p(model)
-})
+#Forward selection model  #JM, below code is giving me errors: Could not find function ols_step_forward_p
+#model <- lm(ytrain$SalePrice ~ ., data = xtrain[,-1])  #added [,-1] part so that we remove the id from model
+#modelforward <- tryCatch({
+#    ols_step_forward(model)
+#}, warning = function(w) {
+#    ols_step_forward_p(model)
+#}, error = function(e) {
+#    ols_step_forward_p(model)
+#})
 
-modelforward
-summary(modelforward)
+#modelforward
+#summary(modelforward)
 
-steps <- modelforward$steps
+#steps <- modelforward$steps
 
-modelforward$adjr[steps]
+#modelforward$adjr[steps]
 
-modelforward$rmse[steps]
+#modelforward$rmse[steps]
 
-modelforward$predictors
+#modelforward$predictors
 
-plot(modelforward)
+#plot(modelforward)
+
+forward.mass <- stepAIC(modelfit_with_interactions, direction = "forward", trace= FALSE, steps = 100)
+
+summary(forward.mass)
 
 #Backward Selection model  #Taking 18 hours to run so far (JM) Corrected code, but taking to long. 
 #Code does not work as desired
@@ -360,14 +419,44 @@ plot(modelforward)
 #modelbackward
 
 #jm - I usually use the MASS package for feature selection and this worked. 
-backward.mass <- stepAIC(model, direction = "backward", trace = FALSE, steps = 100)
+backward.mass <- stepAIC(modelfit_with_interactions, direction = "backward", trace = FALSE, steps = 100)
 
 summary(backward.mass)
 
 
-stepwise.mass <- stepAIC(model, direction = "both", trace = FALSE, steps = 500)
+stepwise.mass <- stepAIC(modelfit_with_interactions, direction = "both", trace = FALSE, steps = 500)
 
 summary(stepwise.mass)
+
+#summary(modelbackward)
+
+#steps <- modelbackward$steps
+
+#modelbackward$adjr[steps]
+
+#modelbackward$rmse[steps]
+
+#modelbackward$predictors
+
+#plot(modelbackward)
+
+#Stepwise Selection model
+#modelstepwise <- ols_step_both(model)
+#modelstepwise
+#plot(modelstepwise)
+
+
+models_list = list(model_all_fields = model_all_fields,
+                  model_without_interactions = model_without_interactions,
+                  model_with_interactions = model_with_interactions,
+                  model_forward_selection = model_forward_selection,
+                  model_backward_selection = model_backward_selection,
+                  model_stepwise_selection = model_stepwise_selection,
+                  forward.mass  = forward.mass,
+                  backward.mass = backward.mass,
+                  stepwise.mass = stepwise.mass)
+resamples = resamples(models_list)
+summary(resamples)
 ```
 
 
@@ -397,8 +486,16 @@ So far we've created four regression models
 ##Outlier Analysis
 
 
+
 #Lasso Model
 
+```{r}
+options(scipen=999)
+
+bwplot(resamples, metric = "RMSE")
+bwplot(resamples, metric = "Rsquared")
+bwplot(resamples, metric = "MAE")
+```
 
 ##Pending tasks
 * Run several models from all the selection processes. - Rene 
@@ -410,5 +507,6 @@ So far we've created four regression models
 *** OverallCond * OverallQual
 *** GarageYrBlt * GarageCars * GarageArea
 ** (Samira) Re-trained the linear models after removing the influenctial datapoints and it increased the adjusted R-squared for the model with interactions form 0.9313 to 0.9611. This means adding the three interaction terms along with removing influential points improves the adjusted R-squared from 0.9179 to 0.9611.
+* (Samira): Added logic for model performance comparision between different feature selection strategies.
 * Clean up and prep final doc within the rmarkdown? - Samira? 
 * Perform the 2-way ANOVA analysis for the second part of the project assignment  --Rajat
