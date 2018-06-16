@@ -16,6 +16,21 @@ if(length(new.packages)) install.packages(new.packages, repos="http://cran.r-pro
 ```
 
 ```{r echo=FALSE, include = FALSE}
+# load the required libraries
+library(sqldf) # Used for manipulating the data frames using SQL
+library(glmnet) # Used for...
+library(caret) # Used for...
+library(forcats) # Used for...
+library(olsrr) # Used for creating the foward
+library(MASS) # Used for backward, and stepwise models
+library(tidyr) #Used for creating some of the plots
+library(ggplot2) #Used for creating some of the plots
+library(corrplot) #Used to create the correlation matrix
+library(parallel) #Using to assign more cores and allow parallel processing
+library(doParallel) #Using to assign more cores and allow parallel processing
+```
+
+```{r echo=FALSE, include = FALSE}
 
 #Load the data
 train <- read.csv("train.csv")
@@ -31,17 +46,6 @@ train$SalePrice <- log(train$SalePrice)
 dim(train)
 str(train)
 
-library(sqldf) # Used for manipulating the data frames using SQL
-library(glmnet) # Used for...
-library(caret) # Used for...
-library(forcats) # Used for...
-library(olsrr) # Used for creating the foward
-library(MASS) # Used for backward, and stepwise models
-library(tidyr) #Used for creating some of the plots
-library(ggplot2) #Used for creating some of the plots
-library(corrplot) #Used to create the correlation matrix
-library(parallel) #Using to assign more cores and allow parallel processing
-library(doParallel)#Using to assign more cores and allow parallel processing
 ```
 
 
