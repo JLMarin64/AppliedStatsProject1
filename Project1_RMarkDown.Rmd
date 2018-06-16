@@ -38,7 +38,7 @@ library(doParallel)#Using to assign more cores and allow parallel processing
 
 
 
-```{r data preparation, echo=FALSE, include = FALSE}
+```{r Data Preparation, echo=FALSE, include = FALSE, warning = FALSE}
 
 
 #Going to assign more cores to R and leave one for OS. Not sure if it will help feature selection
@@ -229,7 +229,7 @@ names(ytrain) <- c("SalePrice")
 ```
 
 
-```{r Regression models, echo=FALSE, include = FALSE}
+```{r Regression models2, echo=FALSE, include = FALSE}
 # retraining the models after removing the influential data points (imporoves the adjusted R^2)
 
 #Running an initial regression model with all the data
@@ -279,28 +279,32 @@ variables
 
 library(MASS)
 
-#Forward selection model
-model <- lm(ytrain$SalePrice ~ ., data = xtrain[,-1])  #added [,-1] part so that we remove the id from model
-modelforward <- tryCatch({
-    ols_step_forward(model)
-}, warning = function(w) {
-    ols_step_forward_p(model)
-}, error = function(e) {
-    ols_step_forward_p(model)
-})
+#Forward selection model  #JM, below code is giving me errors: Could not find function ols_step_forward_p
+#model <- lm(ytrain$SalePrice ~ ., data = xtrain[,-1])  #added [,-1] part so that we remove the id from model
+#modelforward <- tryCatch({
+#    ols_step_forward(model)
+#}, warning = function(w) {
+#    ols_step_forward_p(model)
+#}, error = function(e) {
+#    ols_step_forward_p(model)
+#})
 
-modelforward
-summary(modelforward)
+#modelforward
+#summary(modelforward)
 
-steps <- modelforward$steps
+#steps <- modelforward$steps
 
-modelforward$adjr[steps]
+#modelforward$adjr[steps]
 
-modelforward$rmse[steps]
+#modelforward$rmse[steps]
 
-modelforward$predictors
+#modelforward$predictors
 
-plot(modelforward)
+#plot(modelforward)
+
+forward.mass <- stepAIC(modelfit_with_interactions, direction = "forward", trace= FALSE, steps = 100)
+
+summary(forward.mass)
 
 #Backward Selection model  #Taking 18 hours to run so far (JM) Corrected code, but taking to long. 
 #Code does not work as desired
@@ -308,12 +312,12 @@ plot(modelforward)
 #modelbackward
 
 #jm - I usually use the MASS package for feature selection and this worked. 
-backward.mass <- stepAIC(model, direction = "backward", trace = FALSE, steps = 100)
+backward.mass <- stepAIC(modelfit_with_interactions, direction = "backward", trace = FALSE, steps = 100)
 
 summary(backward.mass)
 
 
-stepwise.mass <- stepAIC(model, direction = "both", trace = FALSE, steps = 500)
+stepwise.mass <- stepAIC(modelfit_with_interactions, direction = "both", trace = FALSE, steps = 500)
 
 summary(stepwise.mass)
 
