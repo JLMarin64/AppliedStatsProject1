@@ -273,34 +273,32 @@ model_all_fields = train(SalePrice ~ .,
 model_without_interactions = train(SalePrice ~ MSSubClass + MSZoning + LotFrontage + LotArea + Street +  LotShape + LandContour + Utilities + LotConfig + LandSlope + Neighborhood + Condition1 + Condition2 + BldgType + HouseStyle + OverallQual + OverallCond + YearBuilt + YearRemodAdd + RoofStyle + RoofMatl + Exterior1st + Exterior2nd + MasVnrType + MasVnrArea + ExterQual + ExterCond + Foundation + BsmtQual + BsmtCond + BsmtExposure + BsmtFinType1 + BsmtFinSF1 + BsmtFinType2 + BsmtFinSF2 + BsmtUnfSF + TotalBsmtSF + Heating + HeatingQC + CentralAir + Electrical + X1stFlrSF + X2ndFlrSF + LowQualFinSF + GrLivArea + BsmtFullBath + BsmtHalfBath + FullBath + HalfBath + BedroomAbvGr + KitchenAbvGr + KitchenQual + TotRmsAbvGrd + Functional + Fireplaces + FireplaceQu + GarageType + GarageYrBlt + GarageFinish + GarageCars + GarageArea + GarageQual + GarageCond + PavedDrive + WoodDeckSF + OpenPorchSF + EnclosedPorch + X3SsnPorch + ScreenPorch + PoolArea +  Fence +  MiscVal + MoSold + YrSold + SaleType + SaleCondition,
               data = train,
               method = "lm",
-              trControl = myControl)
+              trControl = trainControl)
 
 model_with_interactions = train(SalePrice ~ MSSubClass + MSZoning + LotFrontage + LotArea + Street +  LotShape + LandContour + Utilities + LotConfig + LandSlope + Neighborhood + Condition1 + Condition2 + BldgType + HouseStyle + OverallQual + OverallCond + YearBuilt + YearRemodAdd + RoofStyle + RoofMatl + Exterior1st + Exterior2nd + MasVnrType + MasVnrArea + ExterQual + ExterCond + Foundation + BsmtQual + BsmtCond + BsmtExposure + BsmtFinType1 + BsmtFinSF1 + BsmtFinType2 + BsmtFinSF2 + BsmtUnfSF + TotalBsmtSF + Heating + HeatingQC + CentralAir + Electrical + X1stFlrSF + X2ndFlrSF + LowQualFinSF + GrLivArea + BsmtFullBath + BsmtHalfBath + FullBath + HalfBath + BedroomAbvGr + KitchenAbvGr + KitchenQual + TotRmsAbvGrd + Functional + Fireplaces + FireplaceQu + GarageType + GarageYrBlt + GarageFinish + GarageCars + GarageArea + GarageQual + GarageCond + PavedDrive + WoodDeckSF + OpenPorchSF + EnclosedPorch + X3SsnPorch + ScreenPorch + PoolArea +  Fence +  MiscVal + MoSold + YrSold + SaleType + SaleCondition +
                   # Iteraction terms
                   KitchenQual * Neighborhood +
-                  SaleCondition * Neighborhood +
-                  OverallCond * OverallQual +
-                  GarageYrBlt * GarageCars * GarageArea,
+                  SaleCondition * Neighborhood,
               data = train,
               method = "lm",
-              trControl = myControl)
+              trControl = trainControl)
 
 # auto feature selection
 
 model_forward_selection = train(SalePrice ~ ., 
               data = train,
               method = "leapForward",
-              trControl = myControl)
+              trControl = trainControl)
 
 model_backward_selection = train(SalePrice ~ ., 
               data = train,
               method = "leapBackward",
-              trControl = myControl)
+              trControl = trainControl)
 
 model_stepwise_selection = train(SalePrice ~ ., 
               data = train,
               method = "leapSeq",
-              trControl = myControl)
+              trControl = trainControl)
 
 
 models_list = list(model_all_fields = model_all_fields,
@@ -421,9 +419,12 @@ So far we've created four regression models
 ##Outlier Analysis
 
 
+
 #Lasso Model
 
 ```{r}
+options(scipen=999)
+
 bwplot(resamples, metric = "RMSE")
 bwplot(resamples, metric = "Rsquared")
 bwplot(resamples, metric = "MAE")
