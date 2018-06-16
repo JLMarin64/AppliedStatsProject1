@@ -230,12 +230,7 @@ summary(modelfit_all_fields)
 
 hist(ytrain$SalePrice)
 
-
 plot(modelfit_all_fields)
-
-
-#Making the log transformation to SalePrice
-ytrain$SalePrice <- log(ytrain$SalePrice)
 
 #Adjusted R-squared:  0.9179
 print("modelfit_all_fields: ")
