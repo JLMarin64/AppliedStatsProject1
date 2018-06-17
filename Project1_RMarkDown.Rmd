@@ -354,21 +354,44 @@ model_with_interactions = train(SalePrice ~ MSSubClass + MSZoning + LotFrontage 
 model_forward_selection = train(SalePrice ~ ., 
               data = train,
               method = "leapForward",
+              tuneGrid = data.frame(nvmax = seq(from = 200, to = 300, by = 10)),
               trControl = trainControl)
 
 model_backward_selection = train(SalePrice ~ ., 
               data = train,
               method = "leapBackward",
+              tuneGrid = data.frame(nvmax = seq(from = 200, to = 300, by = 10)),
               trControl = trainControl)
 
-model_stepwise_selection = train(SalePrice ~ ., 
-              data = train,
-              method = "leapSeq",
-              trControl = trainControl)
+#model_stepwise_selection = train(SalePrice ~ ., 
+#              data = train,
+#              method = "leapSeq",
+#              tuneGrid = data.frame(nvmax = seq(from = 200, to = 300, by = 10)),
+#              trControl = trainControl)
 
 
 ```
 
+
+```{r}
+options(scipen=999)
+models_list = list(model_all_fields = model_all_fields,
+                  model_without_interactions = model_without_interactions,
+                  model_with_interactions = model_with_interactions,
+                  model_forward_selection = model_forward_selection,
+                  model_backward_selection = model_backward_selection)
+#                  model_stepwise_selection = model_stepwise_selection )
+resamples = resamples(models_list)
+summary(resamples)
+bwplot(resamples, metric = "RMSE")
+bwplot(resamples, metric = "Rsquared")
+bwplot(resamples, metric = "MAE")
+```
+```{r}
+parallelplot(resamples, metric = "RMSE")
+parallelplot(resamples, metric = "Rsquared")
+parallelplot(resamples, metric = "MAE")
+```
 
 
 ```{r, echo = FALSE, include = FALSE}
