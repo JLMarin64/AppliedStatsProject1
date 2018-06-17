@@ -316,6 +316,18 @@ summary(modelfit_with_interactions_no_influential)$adj.r.squared
 
 
 ```{r, echo = FALSE, include = FALSE}
+
+library(caret)
+library(leaps)
+
+library(parallel)
+library(doParallel)
+cluster <- makeCluster(detectCores() - 1) # convention to leave 1 core for OS
+registerDoParallel(cluster)
+
+train <- cbind(xtrain[,-1], ytrain)
+trainControl = trainControl(method = "cv", number = 10, verboseIter = FALSE, allowParallel = TRUE)
+
 train <- cbind(xtrain, ytrain)
 trainControl = trainControl(method = "cv", number = 10, verboseIter = FALSE)
 
