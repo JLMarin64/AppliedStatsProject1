@@ -328,9 +328,6 @@ registerDoParallel(cluster)
 train <- cbind(xtrain[,-1], ytrain)
 trainControl = trainControl(method = "cv", number = 10, verboseIter = FALSE, allowParallel = TRUE)
 
-train <- cbind(xtrain, ytrain)
-trainControl = trainControl(method = "cv", number = 10, verboseIter = FALSE)
-
 model_all_fields = train(SalePrice ~ ., 
               data = train,
               method = "lm",
@@ -374,12 +371,22 @@ model_backward_selection = train(SalePrice ~ .,
 
 
 ```{r}
+model_random_forest = train(SalePrice ~ ., 
+              data = train,
+              tuneLength = 1,
+              method = "ranger",
+              importance = 'impurity',
+              trControl = trainControl)
+```
+
+```{r}
 options(scipen=999)
 models_list = list(model_all_fields = model_all_fields,
                   model_without_interactions = model_without_interactions,
                   model_with_interactions = model_with_interactions,
                   model_forward_selection = model_forward_selection,
-                  model_backward_selection = model_backward_selection)
+                  model_backward_selection = model_backward_selection,
+                  model_random_forest = model_random_forest)
 #                  model_stepwise_selection = model_stepwise_selection )
 resamples = resamples(models_list)
 summary(resamples)
