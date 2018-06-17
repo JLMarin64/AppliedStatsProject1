@@ -385,8 +385,8 @@ models_list = list(model_all_fields = model_all_fields,
                   model_without_interactions = model_without_interactions,
                   model_with_interactions = model_with_interactions,
                   model_forward_selection = model_forward_selection,
-                  model_backward_selection = model_backward_selection,
-                  model_random_forest = model_random_forest)
+                  model_backward_selection = model_backward_selection)
+                 ## model_random_forest = model_random_forest)
 #                  model_stepwise_selection = model_stepwise_selection )
 resamples = resamples(models_list)
 summary(resamples)
@@ -416,6 +416,12 @@ inds <- which(c!=0)
 variables <- row.names(c)[inds]
 variables <- variables[variables %ni% ('Intercept')]
 variables
+
+lasso.model <- lm(train$SalePrice ~ MSZoning + LotArea + OverallQual + YearBuilt + YearRemodAdd+
+          YearRemodAdd + BsmtFinType1 + BsmtFinSF1 + TotalBsmtSF + CentralAir +
+            X1stFlrSF + GrLivArea + BsmtFullBath + FireplaceQu + GarageType + GarageCars + GarageArea, data = xtrain[,-1])
+
+summary(lasso.model)
 
 library(MASS)
 
@@ -528,6 +534,9 @@ options(scipen=999)
 bwplot(resamples, metric = "RMSE")
 bwplot(resamples, metric = "Rsquared")
 bwplot(resamples, metric = "MAE")
+
+summary(lasso.model)
+
 ```
 
 ##Pending tasks
