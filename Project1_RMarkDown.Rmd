@@ -33,6 +33,9 @@ library(doParallel) #Using to assign more cores and allow parallel processing
 
 ```{r echo=FALSE, include = FALSE}
 
+# Set seed for reproducibility
+set.seed(0)
+
 #Load the data
 train <- read.csv("train.csv")
 test <- read.csv("test.csv")
@@ -226,26 +229,17 @@ So far we've created four regression models
 ```{r Regression models, echo=FALSE, include = FALSE, warning= FALSE}
 #Running an initial regression model with all the data
 modelfit_all_fields <- lm(ytrain$SalePrice ~ ., data = xtrain[,-1])
-summary(modelfit_all_fields)
-
-hist(ytrain$SalePrice)
-
 plot(modelfit_all_fields)
-
-#Adjusted R-squared:  0.9179
+#Adjusted R-squared:  0.9337166
 print("modelfit_all_fields: ")
 summary(modelfit_all_fields)$adj.r.squared
 
 # Testing model interactions from problem 2 analysis
 modelfit_without_interactions <- lm(ytrain$SalePrice ~ MSSubClass + MSZoning + LotFrontage + LotArea + Street +  LotShape + LandContour + Utilities + LotConfig + LandSlope + Neighborhood + Condition1 + Condition2 + BldgType + HouseStyle + OverallQual + OverallCond + YearBuilt + YearRemodAdd + RoofStyle + RoofMatl + Exterior1st + Exterior2nd + MasVnrType + MasVnrArea + ExterQual + ExterCond + Foundation + BsmtQual + BsmtCond + BsmtExposure + BsmtFinType1 + BsmtFinSF1 + BsmtFinType2 + BsmtFinSF2 + BsmtUnfSF + TotalBsmtSF + Heating + HeatingQC + CentralAir + Electrical + xtrain$X1stFlrSF + xtrain$X2ndFlrSF + LowQualFinSF + GrLivArea + BsmtFullBath + BsmtHalfBath + FullBath + HalfBath + BedroomAbvGr + KitchenAbvGr + KitchenQual + TotRmsAbvGrd + Functional + Fireplaces + FireplaceQu + GarageType + GarageYrBlt + GarageFinish + GarageCars + GarageArea + GarageQual + GarageCond + PavedDrive + WoodDeckSF + OpenPorchSF + EnclosedPorch + xtrain$X3SsnPorch + ScreenPorch + PoolArea +  Fence +  MiscVal + MoSold + YrSold + SaleType + SaleCondition, data = xtrain[,-1])
 
-#Adjusted R-squared:  0.9179
+#Adjusted R-squared:  0.9337166
 print("modelfit_without_interactions: ")
 summary(modelfit_without_interactions)$adj.r.squared
-
-modelfit3 <- lm(ytrain$SalePrice ~ MSSubClass + MSZoning + LotFrontage + LotArea + Street +  LotShape + LandContour + Utilities + LotConfig + LandSlope + Neighborhood + Condition1 + Condition2 + BldgType + HouseStyle + OverallQual + OverallCond + YearBuilt + YearRemodAdd + RoofStyle + RoofMatl + Exterior1st + Exterior2nd + MasVnrType + MasVnrArea + ExterQual + ExterCond + Foundation + BsmtQual + BsmtCond + BsmtExposure + BsmtFinType1 + BsmtFinSF1 + BsmtFinType2 + BsmtFinSF2 + BsmtUnfSF + TotalBsmtSF + Heating + HeatingQC + CentralAir + Electrical + xtrain$X1stFlrSF + xtrain$X2ndFlrSF + LowQualFinSF + GrLivArea + BsmtFullBath + BsmtHalfBath + FullBath + HalfBath + BedroomAbvGr + KitchenAbvGr + KitchenQual + TotRmsAbvGrd + Functional + Fireplaces + FireplaceQu + GarageType + GarageYrBlt + GarageFinish + GarageCars + GarageArea + GarageQual + GarageCond + PavedDrive + WoodDeckSF + OpenPorchSF + EnclosedPorch + xtrain$X3SsnPorch + ScreenPorch + PoolArea +  Fence +  MiscVal + MoSold + YrSold + SaleType + SaleCondition + KitchenQual * Neighborhood + SaleCondition * Neighborhood , data = xtrain[,-1])
-
-summary(modelfit3)
 
 modelfit_with_interactions    <- lm(ytrain$SalePrice ~ MSSubClass + MSZoning + LotFrontage + LotArea + Street +  LotShape + LandContour + Utilities + LotConfig + LandSlope + Neighborhood + Condition1 + Condition2 + BldgType + HouseStyle + OverallQual + OverallCond + YearBuilt + YearRemodAdd + RoofStyle + RoofMatl + Exterior1st + Exterior2nd + MasVnrType + MasVnrArea + ExterQual + ExterCond + Foundation + BsmtQual + BsmtCond + BsmtExposure + BsmtFinType1 + BsmtFinSF1 + BsmtFinType2 + BsmtFinSF2 + BsmtUnfSF + TotalBsmtSF + Heating + HeatingQC + CentralAir + Electrical + xtrain$X1stFlrSF + xtrain$X2ndFlrSF + LowQualFinSF + GrLivArea + BsmtFullBath + BsmtHalfBath + FullBath + HalfBath + BedroomAbvGr + KitchenAbvGr + KitchenQual + TotRmsAbvGrd + Functional + Fireplaces + FireplaceQu + GarageType + GarageYrBlt + GarageFinish + GarageCars + GarageArea + GarageQual + GarageCond + PavedDrive + WoodDeckSF + OpenPorchSF + EnclosedPorch + xtrain$X3SsnPorch + ScreenPorch + PoolArea +  Fence +  MiscVal + MoSold + YrSold + SaleType + SaleCondition +
                   # Iteraction terms
@@ -255,7 +249,7 @@ modelfit_with_interactions    <- lm(ytrain$SalePrice ~ MSSubClass + MSZoning + L
                   GarageYrBlt * GarageCars * GarageArea,
 data = xtrain[,-1])
 
-# Adjusted R-squared:  0.9313
+# Adjusted R-squared:  0.9469788
 print("modelfit_with_interactions: ")
 summary(modelfit_with_interactions)$adj.r.squared
 ```
@@ -293,20 +287,19 @@ names(ytrain) <- c("SalePrice")
 # retraining the models after removing the influential data points (imporoves the adjusted R^2)
 
 #Running an initial regression model with all the data
-modelfit_all_fields <- lm(ytrain$SalePrice ~ ., data = xtrain[,-1])
-summary(modelfit_all_fields)
-#Adjusted R-squared:  increased from 0.9179 to 0.9587
-print("modelfit_all_fields: ")
-summary(modelfit_all_fields)$adj.r.squared
+modelfit_all_fields_no_influential <- lm(ytrain$SalePrice ~ ., data = xtrain[,-1])
+#Adjusted R-squared:  increased from 0.9337166 to 0.968239
+print("modelfit_all_fields_no_influential: ")
+summary(modelfit_all_fields_no_influential)$adj.r.squared
 
 # Testing model interactions from problem 2 analysis
-modelfit_without_interactions <- lm(ytrain$SalePrice ~ MSSubClass + MSZoning + LotFrontage + LotArea + Street +  LotShape + LandContour + Utilities + LotConfig + LandSlope + Neighborhood + Condition1 + Condition2 + BldgType + HouseStyle + OverallQual + OverallCond + YearBuilt + YearRemodAdd + RoofStyle + RoofMatl + Exterior1st + Exterior2nd + MasVnrType + MasVnrArea + ExterQual + ExterCond + Foundation + BsmtQual + BsmtCond + BsmtExposure + BsmtFinType1 + BsmtFinSF1 + BsmtFinType2 + BsmtFinSF2 + BsmtUnfSF + TotalBsmtSF + Heating + HeatingQC + CentralAir + Electrical + xtrain$X1stFlrSF + xtrain$X2ndFlrSF + LowQualFinSF + GrLivArea + BsmtFullBath + BsmtHalfBath + FullBath + HalfBath + BedroomAbvGr + KitchenAbvGr + KitchenQual + TotRmsAbvGrd + Functional + Fireplaces + FireplaceQu + GarageType + GarageYrBlt + GarageFinish + GarageCars + GarageArea + GarageQual + GarageCond + PavedDrive + WoodDeckSF + OpenPorchSF + EnclosedPorch + xtrain$X3SsnPorch + ScreenPorch + PoolArea +  Fence +  MiscVal + MoSold + YrSold + SaleType + SaleCondition, data = xtrain[,-1])
+modelfit_without_interactions_no_influential <- lm(ytrain$SalePrice ~ MSSubClass + MSZoning + LotFrontage + LotArea + Street +  LotShape + LandContour + Utilities + LotConfig + LandSlope + Neighborhood + Condition1 + Condition2 + BldgType + HouseStyle + OverallQual + OverallCond + YearBuilt + YearRemodAdd + RoofStyle + RoofMatl + Exterior1st + Exterior2nd + MasVnrType + MasVnrArea + ExterQual + ExterCond + Foundation + BsmtQual + BsmtCond + BsmtExposure + BsmtFinType1 + BsmtFinSF1 + BsmtFinType2 + BsmtFinSF2 + BsmtUnfSF + TotalBsmtSF + Heating + HeatingQC + CentralAir + Electrical + xtrain$X1stFlrSF + xtrain$X2ndFlrSF + LowQualFinSF + GrLivArea + BsmtFullBath + BsmtHalfBath + FullBath + HalfBath + BedroomAbvGr + KitchenAbvGr + KitchenQual + TotRmsAbvGrd + Functional + Fireplaces + FireplaceQu + GarageType + GarageYrBlt + GarageFinish + GarageCars + GarageArea + GarageQual + GarageCond + PavedDrive + WoodDeckSF + OpenPorchSF + EnclosedPorch + xtrain$X3SsnPorch + ScreenPorch + PoolArea +  Fence +  MiscVal + MoSold + YrSold + SaleType + SaleCondition, data = xtrain[,-1])
 
-#Adjusted R-squared:  increased from 0.9179 to 0.9587
+#Adjusted R-squared:  increased from  0.9337166 to 0.968239
 print("modelfit_without_interactions: ")
-summary(modelfit_without_interactions)$adj.r.squared
+summary(modelfit_without_interactions_no_influential)$adj.r.squared
 
-modelfit_with_interactions    <- lm(ytrain$SalePrice ~ MSSubClass + MSZoning + LotFrontage + LotArea + Street +  LotShape + LandContour + Utilities + LotConfig + LandSlope + Neighborhood + Condition1 + Condition2 + BldgType + HouseStyle + OverallQual + OverallCond + YearBuilt + YearRemodAdd + RoofStyle + RoofMatl + Exterior1st + Exterior2nd + MasVnrType + MasVnrArea + ExterQual + ExterCond + Foundation + BsmtQual + BsmtCond + BsmtExposure + BsmtFinType1 + BsmtFinSF1 + BsmtFinType2 + BsmtFinSF2 + BsmtUnfSF + TotalBsmtSF + Heating + HeatingQC + CentralAir + Electrical + xtrain$X1stFlrSF + xtrain$X2ndFlrSF + LowQualFinSF + GrLivArea + BsmtFullBath + BsmtHalfBath + FullBath + HalfBath + BedroomAbvGr + KitchenAbvGr + KitchenQual + TotRmsAbvGrd + Functional + Fireplaces + FireplaceQu + GarageType + GarageYrBlt + GarageFinish + GarageCars + GarageArea + GarageQual + GarageCond + PavedDrive + WoodDeckSF + OpenPorchSF + EnclosedPorch + xtrain$X3SsnPorch + ScreenPorch + PoolArea +  Fence +  MiscVal + MoSold + YrSold + SaleType + SaleCondition +
+modelfit_with_interactions_no_influential    <- lm(ytrain$SalePrice ~ MSSubClass + MSZoning + LotFrontage + LotArea + Street +  LotShape + LandContour + Utilities + LotConfig + LandSlope + Neighborhood + Condition1 + Condition2 + BldgType + HouseStyle + OverallQual + OverallCond + YearBuilt + YearRemodAdd + RoofStyle + RoofMatl + Exterior1st + Exterior2nd + MasVnrType + MasVnrArea + ExterQual + ExterCond + Foundation + BsmtQual + BsmtCond + BsmtExposure + BsmtFinType1 + BsmtFinSF1 + BsmtFinType2 + BsmtFinSF2 + BsmtUnfSF + TotalBsmtSF + Heating + HeatingQC + CentralAir + Electrical + xtrain$X1stFlrSF + xtrain$X2ndFlrSF + LowQualFinSF + GrLivArea + BsmtFullBath + BsmtHalfBath + FullBath + HalfBath + BedroomAbvGr + KitchenAbvGr + KitchenQual + TotRmsAbvGrd + Functional + Fireplaces + FireplaceQu + GarageType + GarageYrBlt + GarageFinish + GarageCars + GarageArea + GarageQual + GarageCond + PavedDrive + WoodDeckSF + OpenPorchSF + EnclosedPorch + xtrain$X3SsnPorch + ScreenPorch + PoolArea +  Fence +  MiscVal + MoSold + YrSold + SaleType + SaleCondition +
                   # Iteraction terms
                   KitchenQual * Neighborhood +
                   SaleCondition * Neighborhood +
@@ -314,11 +307,12 @@ modelfit_with_interactions    <- lm(ytrain$SalePrice ~ MSSubClass + MSZoning + L
                   GarageYrBlt * GarageCars * GarageArea,
 data = xtrain[,-1])
 
-# Adjusted R-squared:  increased from 0.9313 to 0.9611
-print("modelfit_with_interactions: ")
-summary(modelfit_with_interactions)$adj.r.squared
+# Adjusted R-squared:  increased from 0.9469788 to 0.9706955
+print("modelfit_with_interactions_no_influential: ")
+summary(modelfit_with_interactions_no_influential)$adj.r.squared
 
 ```
+
 
 
 ```{r, echo = FALSE, include = FALSE}
